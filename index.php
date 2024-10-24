@@ -42,7 +42,7 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h2 class="mb-4">Restaurant Management System</h2>
+        <h2 class="mb-4">Sakura - Restaurant Management System</h2>
         <div class="toast-container"></div>
 
         <!-- Main tab groups -->
