@@ -1,6 +1,7 @@
 function checkDependencyStatus(url, statusElement, dependencyName) {
   return $.get(url)
     .then(function (data) {
+      console.log("Dependency check response:", data); // Debug log
       const $data = $(data);
       const hasOptions = $data.filter('option[value!=""]').length > 0;
 
@@ -14,31 +15,16 @@ function checkDependencyStatus(url, statusElement, dependencyName) {
         );
       return hasOptions;
     })
-    .catch(function (error) {
+    .fail(function (error) {
+      console.error("Error checking dependency:", error);
       $(statusElement)
         .removeClass("checking available unavailable")
         .addClass("unavailable")
         .html(
           `<i class="fas fa-times-circle"></i> Error checking ${dependencyName.toLowerCase()}`
         );
-      console.error("Error checking dependency:", error);
       return false;
     });
-}
-
-// Ingredient Dependencies
-function checkIngredientDependencies() {
-  $(".status-item")
-    .addClass("checking")
-    .html(
-      '<i class="fas fa-circle-notch fa-spin"></i> Checking for units of measurement...'
-    );
-
-  return checkDependencyStatus(
-    "includes/get_units.php",
-    "#unidadMedidaStatus",
-    "Units"
-  );
 }
 
 // Recipe Dependencies
@@ -48,9 +34,9 @@ function checkRecipeDependencies() {
     .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
 
   return checkDependencyStatus(
-    "includes/get_categories.php",
-    "#recipeCategoriaStatus",
-    "Categories"
+    "includes/get_recipes.php",
+    "#recetaStatus",
+    "Recipes"
   );
 }
 
@@ -60,141 +46,101 @@ function checkRecipeIngredientsDependencies() {
     .addClass("checking")
     .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
 
-  Promise.all([
-    checkDependencyStatus(
-      "includes/get_recipes.php",
-      "#recipeIngredientRecetaStatus",
-      "Recipes"
-    ),
-    checkDependencyStatus(
-      "includes/get_ingredients.php",
-      "#recipeIngredientIngredienteStatus",
-      "Ingredients"
-    ),
-  ]);
-}
-
-// Recipe Costs Dependencies
-function checkRecipeCostsDependencies() {
-  $(".status-item")
-    .addClass("checking")
-    .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
-
-  Promise.all([
-    checkDependencyStatus(
-      "includes/get_recipes.php",
-      "#recetaStatus",
-      "Recipes"
-    ),
-    checkDependencyStatus(
-      "includes/get_recipe_costs.php",
-      "#ingredientesStatus",
-      "Recipe ingredients"
-    ),
-  ]);
-}
-
-// Sales Dependencies
-function checkSalesDependencies() {
-  $(".status-item")
-    .addClass("checking")
-    .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
-
-  Promise.all([
-    checkDependencyStatus(
-      "includes/get_recipes.php",
-      "#salesRecetaStatus",
-      "Recipes"
-    ),
-    checkDependencyStatus(
-      "includes/get_recipe_costs.php",
-      "#salesCostoStatus",
-      "Recipe costs"
-    ),
-    checkDependencyStatus(
-      "includes/get_order_types.php",
-      "#salesOrderTypeStatus",
-      "Order types"
-    ),
-  ]);
+  const recipeId = $("#receta_select").val();
+  if (recipeId) {
+    return $.get("includes/get_recipe_ingredients_costs.php", {
+      recipe_id: recipeId,
+    })
+      .then(function (data) {
+        const hasIngredients = data.ingredients && data.ingredients.length > 0;
+        $("#ingredientesStatus")
+          .removeClass("checking available unavailable")
+          .addClass(hasIngredients ? "available" : "unavailable")
+          .html(
+            hasIngredients
+              ? '<i class="fas fa-check-circle"></i> Recipe ingredients available'
+              : '<i class="fas fa-times-circle"></i> No Recipe ingredients available - Create recipe ingredients first'
+          );
+        return hasIngredients;
+      })
+      .fail(function (error) {
+        console.error("Error checking recipe ingredients:", error);
+        $("#ingredientesStatus")
+          .removeClass("checking available unavailable")
+          .addClass("unavailable")
+          .html(
+            '<i class="fas fa-times-circle"></i> Error checking recipe ingredients'
+          );
+        return false;
+      });
+  } else {
+    $("#ingredientesStatus")
+      .removeClass("checking available unavailable")
+      .addClass("unavailable")
+      .html('<i class="fas fa-times-circle"></i> Select a recipe first');
+    return Promise.resolve(false);
+  }
 }
 
 // Initialize all event listeners for tab changes
-document.addEventListener("DOMContentLoaded", function () {
-  // Add CSS for status indicators if not already in main CSS
-  if (!document.querySelector("#dependency-status-styles")) {
-    $('<style id="dependency-status-styles">')
-      .text(
-        `
-                .status-item {
-                    margin: 5px 0;
-                    padding: 5px 0;
-                    transition: all 0.3s ease;
-                }
-                .status-item.checking {
-                    color: #666;
-                }
-                .status-item.available {
-                    color: #28a745;
-                }
-                .status-item.unavailable {
-                    color: #dc3545;
-                }
-                .status-item i {
-                    margin-right: 5px;
-                    width: 16px;
-                    text-align: center;
-                }
-            `
-      )
-      .appendTo("head");
-  }
+$(document).ready(function () {
+  console.log("Dependencies.js loaded"); // Debug log
 
-  // Ingredient tab
-  $('button[data-bs-target="#ingrediente"]').on("shown.bs.tab", function (e) {
-    checkIngredientDependencies();
+  // Handle tab changes
+  $(".nav-link").on("shown.bs.tab", function (e) {
+    const targetId = $(e.target).attr("data-bs-target");
+    console.log("Tab shown:", targetId); // Debug log
+
+    // Only check recipe dependencies in relevant tabs
+    if (targetId === "#costos_receta" || targetId === "#receta_ingredientes") {
+      checkRecipeDependencies().then(function (hasRecipes) {
+        if (hasRecipes && targetId === "#costos_receta") {
+          checkRecipeIngredientsDependencies();
+        }
+      });
+    }
   });
 
-  // Recipe tab
-  $('button[data-bs-target="#receta"]').on("shown.bs.tab", function (e) {
-    checkRecipeDependencies();
-  });
+  // Handle recipe selection changes
+  $("#receta_select").on("change", function () {
+    const targetTab = $(".tab-pane.active").attr("id");
+    console.log("Recipe selection changed in tab:", targetTab); // Debug log
 
-  // Recipe Ingredients tab
-  $('button[data-bs-target="#receta_ingredientes"]').on(
-    "shown.bs.tab",
-    function (e) {
+    if (targetTab === "costos_receta") {
       checkRecipeIngredientsDependencies();
     }
-  );
-
-  // Recipe Costs tab
-  $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
-    checkRecipeCostsDependencies();
   });
 
-  // Sales tab
-  $('button[data-bs-target="#fact_sales"]').on("shown.bs.tab", function (e) {
-    checkSalesDependencies();
+  // Handle form submissions
+  $("form").on("submit", function (e) {
+    const form = this;
+    const formType = $(form).find('input[name="form_type"]').val();
+
+    // After successful form submission
+    setTimeout(function () {
+      const activeTab = $(".tab-pane.active").attr("id");
+      console.log("Form submitted in tab:", activeTab); // Debug log
+
+      if (
+        activeTab === "costos_receta" ||
+        activeTab === "receta_ingredientes"
+      ) {
+        checkRecipeDependencies().then(function (hasRecipes) {
+          if (hasRecipes && activeTab === "costos_receta") {
+            checkRecipeIngredientsDependencies();
+          }
+        });
+      }
+    }, 500);
   });
 
-  // Run initial check for the active tab
+  // Initial dependency check if needed
   const activeTab = $(".tab-pane.active").attr("id");
-  switch (activeTab) {
-    case "ingrediente":
-      checkIngredientDependencies();
-      break;
-    case "receta":
-      checkRecipeDependencies();
-      break;
-    case "receta_ingredientes":
-      checkRecipeIngredientsDependencies();
-      break;
-    case "costos_receta":
-      checkRecipeCostsDependencies();
-      break;
-    case "fact_sales":
-      checkSalesDependencies();
-      break;
+  if (activeTab === "costos_receta" || activeTab === "receta_ingredientes") {
+    checkRecipeDependencies().then(function (hasRecipes) {
+      if (hasRecipes && activeTab === "costos_receta") {
+        checkRecipeIngredientsDependencies();
+      }
+    });
   }
 });
