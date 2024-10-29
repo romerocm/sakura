@@ -1,8 +1,6 @@
 <?php
 require_once '../config.php';
 
-header('Content-Type: application/json');
-
 try {
     $database = new Database();
     $db = $database->connect();
@@ -11,9 +9,17 @@ try {
     $stmt = $db->prepare($query);
     $stmt->execute();
     
-    $units = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($units);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if (empty($results)) {
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'No units found']);
+    } else {
+        header('Content-Type: application/json');
+        echo json_encode($results);
+    }
 } catch(PDOException $e) {
+    error_log("Database Error in get_all_units.php: " . $e->getMessage());
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
-?>

@@ -38,6 +38,30 @@
         .nested-tab {
             margin-top: 15px;
         }
+        .status-item {
+            margin: 5px 0;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+        .status-item.checking {
+            color: #666;
+        }
+        .status-item.available {
+            color: #28a745;
+        }
+        .status-item.unavailable {
+            color: #dc3545;
+        }
+        .dependency-status .card {
+            margin-bottom: 20px;
+            border-left: 4px solid #0d6efd;
+        }
+        .dependency-status .card-body {
+            padding: 15px;
+        }
+        .alert-info {
+            border-left: 4px solid #0dcaf0;
+        }
     </style>
 </head>
 <body>
@@ -49,19 +73,19 @@
         <ul class="nav nav-pills mb-3" id="mainTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="ingredients-tab" data-bs-toggle="pill" 
-                        data-bs-target="#ingredients-section" type="button">
+                        data-bs-target="#ingredients-section" type="button" role="tab">
                     <i class="fas fa-carrot"></i> Ingredients Management
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="recipes-tab" data-bs-toggle="pill" 
-                        data-bs-target="#recipes-section" type="button">
+                        data-bs-target="#recipes-section" type="button" role="tab">
                     <i class="fas fa-book"></i> Recipes Management
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="sales-tab" data-bs-toggle="pill" 
-                        data-bs-target="#sales-section" type="button">
+                        data-bs-target="#sales-section" type="button" role="tab">
                     <i class="fas fa-cash-register"></i> Sales Management
                 </button>
             </li>
@@ -75,19 +99,19 @@
                 <ul class="nav nav-tabs" id="ingredientsTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="unidad-medida-tab" data-bs-toggle="tab" 
-                                data-bs-target="#unidad_medida" type="button">
+                                data-bs-target="#unidad_medida" type="button" role="tab">
                             <i class="fas fa-ruler"></i> Unidad Medida
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="categoria-tab" data-bs-toggle="tab" 
-                                data-bs-target="#categoria" type="button">
+                                data-bs-target="#categoria" type="button" role="tab">
                             <i class="fas fa-tags"></i> Categoría
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="ingrediente-tab" data-bs-toggle="tab" 
-                                data-bs-target="#ingrediente" type="button">
+                                data-bs-target="#ingrediente" type="button" role="tab">
                             <i class="fas fa-pepper-hot"></i> Ingrediente
                         </button>
                     </li>
@@ -107,19 +131,19 @@
                 <ul class="nav nav-tabs" id="recipesTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="receta-tab" data-bs-toggle="tab" 
-                                data-bs-target="#receta" type="button">
+                                data-bs-target="#receta" type="button" role="tab">
                             <i class="fas fa-scroll"></i> Receta
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="receta-ingredientes-tab" data-bs-toggle="tab" 
-                                data-bs-target="#receta_ingredientes" type="button">
+                                data-bs-target="#receta_ingredientes" type="button" role="tab">
                             <i class="fas fa-mortar-pestle"></i> Receta Ingredientes
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="costos-receta-tab" data-bs-toggle="tab" 
-                                data-bs-target="#costos_receta" type="button">
+                                data-bs-target="#costos_receta" type="button" role="tab">
                             <i class="fas fa-calculator"></i> Costos Receta
                         </button>
                     </li>
@@ -139,13 +163,13 @@
                 <ul class="nav nav-tabs" id="salesTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="dim-order-tab" data-bs-toggle="tab" 
-                                data-bs-target="#dim_order" type="button">
+                                data-bs-target="#dim_order" type="button" role="tab">
                             <i class="fas fa-clipboard-list"></i> Order Types
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="fact-sales-tab" data-bs-toggle="tab" 
-                                data-bs-target="#fact_sales" type="button">
+                                data-bs-target="#fact_sales" type="button" role="tab">
                             <i class="fas fa-receipt"></i> Sales Records
                         </button>
                     </li>
@@ -165,32 +189,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom Scripts -->
-    <script>
-        // Toast functionality
-        function showToast(message, type = 'success') {
-            const toastHtml = `
-                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-            `;
-            
-            const toastContainer = document.querySelector('.toast-container');
-            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-            
-            const toastElement = toastContainer.lastElementChild;
-            const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
-            toast.show();
-            
-            toastElement.addEventListener('hidden.bs.toast', function () {
-                this.remove();
-            });
-        }
+    <script src="js/form-handlers.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/dependencies.js"></script>
 
+    <script>
         // Form handling
         document.addEventListener('DOMContentLoaded', function() {
             // Toggle manual ID inputs
@@ -220,6 +223,8 @@
                             showToast(data.message, 'success');
                             this.reset();
                             loadSelectOptions();
+                            // Recheck dependencies after successful form submission
+                            checkAllDependencies();
                         } else {
                             showToast(data.message, 'danger');
                         }
@@ -256,6 +261,25 @@
                 $.get('includes/get_recipe_costs.php', function(data) {
                     $('#costo_receta_id').html(data);
                 });
+            }
+
+            // Function to check all dependencies
+            function checkAllDependencies() {
+                const activeTabId = $('.tab-pane.active').attr('id');
+                switch(activeTabId) {
+                    case 'recipes-section':
+                        checkRecipeDependencies();
+                        break;
+                    case 'receta_ingredientes':
+                        checkRecipeIngredientsDependencies();
+                        break;
+                    case 'costos_receta':
+                        checkRecipeCostsDependencies();
+                        break;
+                    case 'fact_sales':
+                        checkSalesDependencies();
+                        break;
+                }
             }
 
             // Initial load of select options

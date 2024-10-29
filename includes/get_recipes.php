@@ -1,21 +1,26 @@
 <?php
 require_once '../config.php';
 
-header('Content-Type: application/json');
-
 try {
     $database = new Database();
     $db = $database->connect();
     
-    $query = "SELECT receta_id, nombre_receta FROM receta_standar ORDER BY nombre_receta";
+    $query = "SELECT receta_id, nombre_receta FROM receta_estandar ORDER BY nombre_receta";
     $stmt = $db->prepare($query);
     $stmt->execute();
     
-    echo "<option value=''>Select Recipe</option>";
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "<option value='" . htmlspecialchars($row['receta_id']) . "'>" . htmlspecialchars($row['nombre_receta']) . "</option>";
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if (empty($results)) {
+        echo "<option value=''>No recipes available</option>";
+    } else {
+        echo "<option value=''>Select Recipe</option>";
+        foreach($results as $row) {
+            echo "<option value='" . htmlspecialchars($row['receta_id']) . "'>" 
+                 . htmlspecialchars($row['nombre_receta']) . "</option>";
+        }
     }
 } catch(PDOException $e) {
+    error_log("Database Error in get_recipes.php: " . $e->getMessage());
     echo "<option value=''>Error loading recipes</option>";
 }
-?>

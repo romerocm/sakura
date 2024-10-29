@@ -1,9 +1,8 @@
 <?php
 require_once '../config.php';
 
-header('Content-Type: application/json');
-
 if (!isset($_GET['id'])) {
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'No ingredient ID provided']);
     exit;
 }
@@ -18,8 +17,15 @@ try {
     $stmt->execute();
     
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo json_encode($result);
+    
+    header('Content-Type: application/json');
+    if ($result) {
+        echo json_encode($result);
+    } else {
+        echo json_encode(['error' => 'Ingredient not found']);
+    }
 } catch(PDOException $e) {
+    error_log("Database Error in get_ingredient_cost.php: " . $e->getMessage());
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
-?>
