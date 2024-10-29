@@ -12,13 +12,9 @@ try {
     $database = new Database();
     $db = $database->connect();
     
-    // Get recipe details first
-    $recipeQuery = "SELECT re.receta_id, 
-                           re.nombre_receta, 
-                           re.numero_preparacion,
-                           re.numero_porciones,
-                           re.fecha_elaboracion,
-                           re.categoria_id
+    // Get recipe details
+    $recipeQuery = "SELECT re.receta_id, re.nombre_receta, re.numero_porciones, 
+                           re.categoria_id, re.numero_preparacion, re.fecha_elaboracion
                     FROM receta_estandar re 
                     WHERE re.receta_id = :recipe_id";
                     
@@ -33,15 +29,12 @@ try {
     }
     
     // Get recipe ingredients with their costs
-    $ingredientsQuery = "SELECT ri.receta_ingredientes_id,
-                               ri.ingrediente_id, 
+    $ingredientsQuery = "SELECT ri.ingrediente_id, 
                                ri.cantidad,
                                ri.costo_total,
                                i.nombre as ingrediente_nombre,
                                i.costo_unitario,
-                               i.descripcion as ingrediente_descripcion,
-                               um.nombre as unidad_medida,
-                               um.unidad_id
+                               um.nombre as unidad_medida
                         FROM receta_ingredientes ri
                         JOIN ingrediente i ON ri.ingrediente_id = i.ingrediente_id
                         JOIN unidad_medida um ON i.unidad_id = um.unidad_id
@@ -67,11 +60,6 @@ try {
     foreach ($ingredients as $ingredient) {
         $totalCost += floatval($ingredient['costo_total']);
     }
-    
-    // Log for debugging
-    error_log("Recipe ID: " . $_GET['recipe_id']);
-    error_log("Found " . count($ingredients) . " ingredients");
-    error_log("Total cost calculated: " . $totalCost);
     
     // Prepare response
     $response = [
