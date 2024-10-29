@@ -1,4 +1,4 @@
-// Add this to your existing form-handlers.js
+// Form handling logic
 function loadSelectOptions() {
   // Load recipes into all recipe select elements
   const recipeSelectors = [
@@ -41,12 +41,147 @@ function loadSelectOptions() {
   });
 }
 
-// Document ready handler
+// Function to check recipe dependencies
+function checkRecipeDependencies() {
+  $.get("includes/get_categories.php", function (data) {
+    const hasCategories = $(data).filter('option[value!=""]').length > 0;
+    $("#recipeCategoriaStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasCategories ? "available" : "unavailable")
+      .html(
+        hasCategories
+          ? '<i class="fas fa-check-circle"></i> Categories available'
+          : '<i class="fas fa-times-circle"></i> No categories available - Create categories first'
+      );
+  });
+}
+
+// Function to check recipe ingredients dependencies
+function checkRecipeIngredientsDependencies() {
+  $.get("includes/get_recipes.php", function (data) {
+    const hasRecipes = $(data).filter('option[value!=""]').length > 0;
+    $("#recipeIngredientRecetaStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasRecipes ? "available" : "unavailable")
+      .html(
+        hasRecipes
+          ? '<i class="fas fa-check-circle"></i> Recipes available'
+          : '<i class="fas fa-times-circle"></i> No recipes available - Create recipes first'
+      );
+  });
+
+  $.get("includes/get_ingredients.php", function (data) {
+    const hasIngredients = $(data).filter('option[value!=""]').length > 0;
+    $("#recipeIngredientIngredienteStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasIngredients ? "available" : "unavailable")
+      .html(
+        hasIngredients
+          ? '<i class="fas fa-check-circle"></i> Ingredients available'
+          : '<i class="fas fa-times-circle"></i> No ingredients available - Add ingredients first'
+      );
+  });
+}
+
+// Function to check sales dependencies
+function checkSalesDependencies() {
+  // Check for recipes
+  $.get("includes/get_recipes.php", function (data) {
+    const hasRecipes = $(data).filter('option[value!=""]').length > 0;
+    $("#salesRecetaStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasRecipes ? "available" : "unavailable")
+      .html(
+        hasRecipes
+          ? '<i class="fas fa-check-circle"></i> Recipes available'
+          : '<i class="fas fa-times-circle"></i> No recipes available - Create recipes first'
+      );
+  });
+
+  // Check for recipe costs
+  $.get("includes/get_recipe_costs.php", function (data) {
+    const hasCosts = $(data).filter('option[value!=""]').length > 0;
+    $("#salesCostoStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasCosts ? "available" : "unavailable")
+      .html(
+        hasCosts
+          ? '<i class="fas fa-check-circle"></i> Recipe costs available'
+          : '<i class="fas fa-times-circle"></i> No recipe costs available - Calculate costs first'
+      );
+  });
+
+  // Check for order types
+  $.get("includes/get_order_types.php", function (data) {
+    const hasOrderTypes = $(data).filter('option[value!=""]').length > 0;
+    $("#salesOrderTypeStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasOrderTypes ? "available" : "unavailable")
+      .html(
+        hasOrderTypes
+          ? '<i class="fas fa-check-circle"></i> Order types available'
+          : '<i class="fas fa-times-circle"></i> No order types available - Create order types first'
+      );
+  });
+}
+
+// Function to check ingredient dependencies
+function checkIngredientDependencies() {
+  $.get("includes/get_units.php", function (data) {
+    const hasUnits = $(data).filter('option[value!=""]').length > 0;
+    $("#unidadMedidaStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasUnits ? "available" : "unavailable")
+      .html(
+        hasUnits
+          ? '<i class="fas fa-check-circle"></i> Units of measurement available'
+          : '<i class="fas fa-times-circle"></i> No units available - Create units first'
+      );
+  });
+}
+
+// Function to check all dependencies based on current tab
+function checkAllDependencies() {
+  const currentTab = $(".tab-pane.active").attr("id");
+  switch (currentTab) {
+    case "receta":
+      checkRecipeDependencies();
+      break;
+    case "receta_ingredientes":
+      checkRecipeIngredientsDependencies();
+      break;
+    case "costos_receta":
+      checkDependencyStatus();
+      break;
+    case "fact_sales":
+      checkSalesDependencies();
+      break;
+    case "ingrediente":
+      checkIngredientDependencies();
+      break;
+  }
+}
+
+// Initialize when document is ready
 $(document).ready(function () {
   // Initial load of select options
   loadSelectOptions();
 
-  // Reload select options after form submissions
+  // Handle manual ID toggles
+  document
+    .querySelectorAll('.manual-id-toggle input[type="checkbox"]')
+    .forEach((checkbox) => {
+      checkbox.addEventListener("change", function () {
+        const form = this.closest("form");
+        const idInput = form.querySelector(".id-input");
+        idInput.style.display = this.checked ? "block" : "none";
+        if (!this.checked) {
+          idInput.querySelector("input").value = "";
+        }
+      });
+    });
+
+  // Single form submission handler
   $("form").on("submit", function (e) {
     e.preventDefault();
 
@@ -61,10 +196,16 @@ $(document).ready(function () {
       success: function (response) {
         if (response.success) {
           showToast(response.message, "success");
-          loadSelectOptions(); // Reload all select options
+          // Reset the form
+          e.target.reset();
+          // Reload select options
+          loadSelectOptions();
+          // Reset calculations if in costos_receta tab
           if ($("#costos_receta").hasClass("active")) {
             resetCalculations();
           }
+          // Recheck dependencies
+          checkAllDependencies();
         } else {
           showToast(response.message || "Error saving data", "danger");
         }
@@ -77,9 +218,37 @@ $(document).ready(function () {
 
   // Handle tab changes
   $(".nav-link").on("shown.bs.tab", function (e) {
-    loadSelectOptions(); // Reload options when switching tabs
+    loadSelectOptions();
+    checkAllDependencies();
   });
+
+  // Auto-calculate total cost when ingredient and quantity change
+  $("#ingrediente_select, #cantidad").on("change input", function () {
+    const ingredienteId = $("#ingrediente_select").val();
+    const cantidad = $("#cantidad").val();
+
+    if (ingredienteId && cantidad) {
+      $.get(
+        "includes/get_ingredient_cost.php",
+        { id: ingredienteId },
+        function (data) {
+          if (data.costo_unitario) {
+            const totalCost =
+              parseFloat(data.costo_unitario) * parseFloat(cantidad);
+            $("#costo_total").val(totalCost.toFixed(2));
+          }
+        }
+      );
+    }
+  });
+
+  // Initial dependency check
+  checkAllDependencies();
 });
 
-// Export the function so it can be used by other scripts
+// Export functions for use in other scripts
 window.loadSelectOptions = loadSelectOptions;
+window.checkAllDependencies = checkAllDependencies;
+window.checkDependencyStatus = checkDependencyStatus;
+window.checkRecipeIngredientsDependencies = checkRecipeIngredientsDependencies;
+window.checkSalesDependencies = checkSalesDependencies;
