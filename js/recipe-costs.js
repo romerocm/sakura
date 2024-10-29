@@ -1,29 +1,25 @@
-// Only calculation-related functions
 function calculateRecipeCosts() {
   const recipeId = $("#receta_select").val();
-  console.log("Calculating costs for recipe:", recipeId);
-
-  if (!recipeId || recipeId === "") {
+  if (!recipeId) {
     resetCalculations();
     return;
   }
 
   $.get("includes/get_recipe_ingredients_costs.php", { recipe_id: recipeId })
     .done(function (data) {
-      if (data.error) {
-        showToast(data.error, "danger");
+      if (!data.ingredients || data.ingredients.length === 0) {
         resetCalculations();
         return;
       }
 
       try {
-        // Get basic values
+        // Calculate total cost of ingredients
         const costoTotalMateriaPrima = data.ingredients.reduce(
           (sum, item) => sum + parseFloat(item.costo_total || 0),
           0
         );
 
-        // Get form input values
+        // Get other values from form
         const margenError =
           parseFloat($("#margen_error_porcentaje").val()) || 10;
         const numeroPorciones = parseFloat(data.recipe.numero_porciones) || 1;
@@ -32,61 +28,58 @@ function calculateRecipeCosts() {
         const impuestoConsumo =
           parseFloat($("#impuesto_consumo_porcentaje").val()) || 13;
 
-        console.log("Initial values:", {
-          costoTotalMateriaPrima,
-          margenError,
-          numeroPorciones,
-          porcentajeCostoMP,
-          impuestoConsumo,
-        });
-
-        // Update all form fields with calculations
+        // Set costo total materia prima
         $("#costo_total_materia_prima").val(costoTotalMateriaPrima.toFixed(2));
 
+        // Calculate margen error value
         const margenErrorValue = costoTotalMateriaPrima * (margenError / 100);
+
+        // Calculate costo total preparacion
         const costoTotalPreparacion = costoTotalMateriaPrima + margenErrorValue;
         $("#costo_total_preparacion").val(costoTotalPreparacion.toFixed(2));
 
+        // Calculate costo por porcion
         const costoPorPorcion = costoTotalPreparacion / numeroPorciones;
         $("#costo_por_porcion").val(costoPorPorcion.toFixed(2));
 
+        // Calculate precio potencial venta
         const precioPotencialVenta =
           costoPorPorcion / (porcentajeCostoMP / 100);
         $("#precio_potencial_venta").val(precioPotencialVenta.toFixed(2));
 
-        const impuestoConsumoValue =
-          precioPotencialVenta * (impuestoConsumo / 100);
-        const precioVentaSugerido = precioPotencialVenta + impuestoConsumoValue;
+        // Calculate impuesto value
+        const impuestoValue = precioPotencialVenta * (impuestoConsumo / 100);
+
+        // Calculate precio venta sugerido
+        const precioVentaSugerido = precioPotencialVenta + impuestoValue;
         $("#precio_venta").val(precioVentaSugerido.toFixed(2));
 
+        // Calculate precio real venta
         const precioRealVentaSinIVA =
           precioVentaSugerido / (1 + impuestoConsumo / 100);
         $("#precio_real_venta").val(precioRealVentaSinIVA.toFixed(2));
 
-        const ivaCobradoPorPorcion =
-          precioVentaSugerido - precioRealVentaSinIVA;
-        $("#iva_por_porcion").val(ivaCobradoPorPorcion.toFixed(2));
+        // Calculate IVA por porcion
+        const ivaPorPorcion = precioVentaSugerido - precioRealVentaSinIVA;
+        $("#iva_por_porcion").val(ivaPorPorcion.toFixed(2));
 
-        const porcentajeRealCostoMP =
+        // Calculate porcentaje real costo
+        const porcentajeRealCosto =
           (costoPorPorcion / precioRealVentaSinIVA) * 100;
-        $("#porcentaje_real_costo").val(porcentajeRealCostoMP.toFixed(2));
-
-        console.log("Calculations completed successfully");
+        $("#porcentaje_real_costo").val(porcentajeRealCosto.toFixed(2));
       } catch (error) {
         console.error("Error in calculations:", error);
-        showToast("Error in calculations: " + error.message, "danger");
         resetCalculations();
       }
     })
     .fail(function (error) {
       console.error("Error fetching recipe data:", error);
-      showToast("Error calculating recipe costs", "danger");
       resetCalculations();
     });
 }
 
 function resetCalculations() {
-  const fieldsToReset = [
+  const fields = [
     "costo_total_materia_prima",
     "costo_total_preparacion",
     "costo_por_porcion",
@@ -97,22 +90,26 @@ function resetCalculations() {
     "porcentaje_real_costo",
   ];
 
-  fieldsToReset.forEach((fieldId) => {
-    $(`#${fieldId}`).val("0.00");
-  });
+  fields.forEach((field) => $(`#${field}`).val("0.00"));
 }
 
-// Only bind calculation-specific events
+// Initialize when document is ready
 $(document).ready(function () {
-  // Handle input changes that should trigger recalculation
+  // Only calculate when recipe is selected
+  $("#receta_select").on("change", function () {
+    if ($(this).val()) {
+      calculateRecipeCosts();
+    } else {
+      resetCalculations();
+    }
+  });
+
+  // Recalculate when these inputs change
   $(
     "#margen_error_porcentaje, #porcentaje_costo_mp, #impuesto_consumo_porcentaje"
   ).on("input", function () {
-    if ($("#costos_receta").hasClass("active")) {
-      const recipeId = $("#receta_select").val();
-      if (recipeId && recipeId !== "") {
-        calculateRecipeCosts();
-      }
+    if ($("#receta_select").val()) {
+      calculateRecipeCosts();
     }
   });
 });
