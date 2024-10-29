@@ -38,7 +38,7 @@
         <!-- Manual ID Input -->
         <div class="mb-3 id-input" id="costosRecetaIdInput">
             <label for="costo_receta_id" class="form-label">ID</label>
-            <input type="number" class="form-control" name="costo_receta_id" min="1">
+            <input type="number" class="form-control" id="costo_receta_id" name="costo_receta_id" min="1">
         </div>
 
         <!-- Recipe Selection -->
@@ -49,15 +49,7 @@
             </select>
         </div>
 
-        <!-- Recipe Ingredients Selection -->
-        <div class="mb-3">
-            <label for="receta_ingredientes_select" class="form-label">Receta Ingredientes</label>
-            <select class="form-control" id="receta_ingredientes_select" name="receta_ingredientes_id" required>
-                <option value="">Select Recipe Ingredients</option>
-            </select>
-        </div>
-
-        <!-- Raw Material Costs -->
+        <!-- Cost Fields -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -143,7 +135,7 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="precio_venta" class="form-label">Precio Venta</label>
+                    <label for="precio_venta" class="form-label">Precio Venta Sugerido</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_venta" 
@@ -153,11 +145,11 @@
             </div>
         </div>
 
-        <!-- Menu Price and Real Sales Price -->
+        <!-- Menu Price -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="precio_carta" class="form-label">Precio Carta</label>
+                    <label for="precio_carta" class="form-label">Precio de Menú o Carta</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_carta" 
@@ -167,7 +159,7 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="precio_real_venta" class="form-label">Precio Real Venta</label>
+                    <label for="precio_real_venta" class="form-label">Precio Real de Venta (Sin IVA)</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_real_venta" 
@@ -177,7 +169,7 @@
             </div>
         </div>
 
-        <!-- VAT and Real Cost -->
+        <!-- Final Calculations -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -191,7 +183,7 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="porcentaje_real_costo" class="form-label">% Real de Costo</label>
+                    <label for="porcentaje_real_costo" class="form-label">% Real de Costo MP</label>
                     <div class="input-group">
                         <input type="number" step="0.01" class="form-control" id="porcentaje_real_costo" 
                                name="porcentaje_real_costo" readonly>
@@ -206,5 +198,3 @@
         </button>
     </form>
 </div>
-
-<script src="js/recipe-costs.js"></script>
