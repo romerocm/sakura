@@ -49,7 +49,7 @@
                 <!-- Sale Date -->
                 <div class="mb-3">
                     <label for="sale_date" class="form-label">Fecha de Venta</label>
-                    <input type="date-local" class="form-control" id="sale_date" name="sale_date" required>
+                    <input type="date" class="form-control" id="sale_date" name="sale_date" required>
                 </div>
             </div>
             <div class="col-md-6">
