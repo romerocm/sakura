@@ -16,7 +16,6 @@ try {
     
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Debug: Print results
     error_log("Found " . count($results) . " recipes");
     
     // Start with an empty select option
