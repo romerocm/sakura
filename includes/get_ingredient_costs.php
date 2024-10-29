@@ -117,14 +117,14 @@ try {
     echo json_encode($response);
     
 } catch(PDOException $e) {
-    error_log("Database Error in get_recipe_ingredients_costs.php: " . $e->getMessage());
+    error_log("Database Error in get_ingredient_costs.php: " . $e->getMessage());
     error_log("SQL State: " . $e->getCode());
     echo json_encode([
         'error' => 'Database error occurred',
         'details' => $e->getMessage()
     ]);
 } catch(Exception $e) {
-    error_log("General Error in get_recipe_ingredients_costs.php: " . $e->getMessage());
+    error_log("General Error in get_ingredient_costs.php: " . $e->getMessage());
     echo json_encode([
         'error' => 'An error occurred while processing the request',
         'details' => $e->getMessage()

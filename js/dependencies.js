@@ -33,7 +33,7 @@ function checkDependencyStatus() {
 function checkRecipeIngredients(recipeId) {
   if (!recipeId) return;
 
-  $.get("includes/get_recipe_ingredients_costs.php", { recipe_id: recipeId })
+  $.get("includes/get_ingredient_costs.php", { recipe_id: recipeId })
     .done(function (data) {
       const hasIngredients = data.ingredients && data.ingredients.length > 0;
       $("#ingredientesStatus")
