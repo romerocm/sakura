@@ -1,7 +1,10 @@
 function checkDependencyStatus(url, statusElement) {
   return $.get(url)
     .then(function (data) {
-      const hasOptions = $(data).filter('option[value!=""]').length > 0;
+      // Convert string to jQuery object to check for options
+      const $data = $(data);
+      const hasOptions = $data.filter('option[value!=""]').length > 0;
+
       $(statusElement)
         .removeClass("checking available unavailable")
         .addClass(hasOptions ? "available" : "unavailable")
@@ -22,18 +25,27 @@ function checkDependencyStatus(url, statusElement) {
     });
 }
 
+// Ingredient Dependencies
+function checkIngredientDependencies() {
+  $(".status-item")
+    .addClass("checking")
+    .html(
+      '<i class="fas fa-circle-notch fa-spin"></i> Checking for units of measurement...'
+    );
+
+  return checkDependencyStatus("includes/get_units.php", "#unidadMedidaStatus");
+}
+
 // Recipe Dependencies
 function checkRecipeDependencies() {
   $(".status-item")
     .addClass("checking")
     .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
 
-  return Promise.all([
-    checkDependencyStatus(
-      "includes/get_categories.php",
-      "#recipeCategoriaStatus"
-    ),
-  ]);
+  return checkDependencyStatus(
+    "includes/get_categories.php",
+    "#recipeCategoriaStatus"
+  );
 }
 
 // Recipe Ingredients Dependencies
@@ -42,7 +54,7 @@ function checkRecipeIngredientsDependencies() {
     .addClass("checking")
     .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
 
-  return Promise.all([
+  Promise.all([
     checkDependencyStatus(
       "includes/get_recipes.php",
       "#recipeIngredientRecetaStatus"
@@ -60,7 +72,7 @@ function checkRecipeCostsDependencies() {
     .addClass("checking")
     .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
 
-  return Promise.all([
+  Promise.all([
     checkDependencyStatus("includes/get_recipes.php", "#recetaStatus"),
     checkDependencyStatus(
       "includes/get_recipe_costs.php",
@@ -75,7 +87,7 @@ function checkSalesDependencies() {
     .addClass("checking")
     .html('<i class="fas fa-circle-notch fa-spin"></i> Checking...');
 
-  return Promise.all([
+  Promise.all([
     checkDependencyStatus("includes/get_recipes.php", "#salesRecetaStatus"),
     checkDependencyStatus("includes/get_recipe_costs.php", "#salesCostoStatus"),
     checkDependencyStatus(
@@ -85,46 +97,38 @@ function checkSalesDependencies() {
   ]);
 }
 
-// Initialize dependencies check on tab show
-$(document).ready(function () {
+// Initialize all event listeners for tab changes
+document.addEventListener("DOMContentLoaded", function () {
+  // Ingredient tab
+  $('button[data-bs-target="#ingrediente"]').on("shown.bs.tab", function (e) {
+    checkIngredientDependencies();
+  });
+
   // Recipe tab
-  $("#recipes-section").on("shown.bs.tab", function () {
+  $('button[data-bs-target="#receta"]').on("shown.bs.tab", function (e) {
     checkRecipeDependencies();
   });
 
   // Recipe Ingredients tab
-  $("#receta-ingredientes").on("shown.bs.tab", function () {
-    checkRecipeIngredientsDependencies();
-  });
+  $('button[data-bs-target="#receta_ingredientes"]').on(
+    "shown.bs.tab",
+    function (e) {
+      checkRecipeIngredientsDependencies();
+    }
+  );
 
   // Recipe Costs tab
-  $("#costos_receta").on("shown.bs.tab", function () {
+  $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
     checkRecipeCostsDependencies();
   });
 
   // Sales tab
-  $("#fact_sales").on("shown.bs.tab", function () {
+  $('button[data-bs-target="#fact_sales"]').on("shown.bs.tab", function (e) {
     checkSalesDependencies();
   });
 
-  // Add CSS for status indicators
-  $("<style>")
-    .text(
-      `
-            .status-item {
-                margin: 5px 0;
-                padding: 5px 0;
-            }
-            .status-item.checking {
-                color: #666;
-            }
-            .status-item.available {
-                color: #28a745;
-            }
-            .status-item.unavailable {
-                color: #dc3545;
-            }
-        `
-    )
-    .appendTo("head");
+  // Run initial check if we're on the ingredients tab
+  if ($("#ingrediente").hasClass("active")) {
+    checkIngredientDependencies();
+  }
 });
