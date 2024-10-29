@@ -1,84 +1,12 @@
-function loadRecipeOptions() {
-  console.log("Loading recipes..."); // Debug log
-
-  // Show loading state
-  $("#receta_select")
-    .prop("disabled", true)
-    .html('<option value="">Loading recipes...</option>');
-
-  // Use jQuery get with explicit content type
-  $.ajax({
-    url: "includes/get_recipes.php",
-    method: "GET",
-    dataType: "html",
-    success: function (data) {
-      console.log("Recipes HTML received");
-      // Directly insert the HTML
-      $("#receta_select").html(data).prop("disabled", false);
-
-      // Only update dependency status, don't calculate
-      updateDependencyStatus();
-    },
-    error: function (jqXHR, textStatus, errorThrown) {
-      console.error("Error loading recipes:", textStatus, errorThrown);
-      $("#receta_select")
-        .html('<option value="">Error loading recipes</option>')
-        .prop("disabled", false);
-      showToast("Error loading recipes", "danger");
-    },
-  });
-}
-
-function updateDependencyStatus() {
-  // Check for recipes
-  $.get("includes/get_recipes.php", function (data) {
-    console.log("Checking recipes status..."); // Debug log
-    const hasRecipes = $(data).filter('option[value!=""]').length > 0;
-    $("#recetaStatus")
-      .removeClass("checking available unavailable")
-      .addClass(hasRecipes ? "available" : "unavailable")
-      .html(
-        hasRecipes
-          ? '<i class="fas fa-check-circle"></i> Recipes available'
-          : '<i class="fas fa-times-circle"></i> No recipes available - Create a recipe first'
-      );
-  });
-
-  // Check for recipe ingredients only if a recipe is selected
-  const recipeId = $("#receta_select").val();
-  if (recipeId && recipeId !== "") {
-    $.get("includes/get_recipe_ingredients_costs.php", {
-      recipe_id: recipeId,
-    }).done(function (data) {
-      console.log("Checking recipe ingredients status..."); // Debug log
-      const hasIngredients = data.ingredients && data.ingredients.length > 0;
-      $("#ingredientesStatus")
-        .removeClass("checking available unavailable")
-        .addClass(hasIngredients ? "available" : "unavailable")
-        .html(
-          hasIngredients
-            ? '<i class="fas fa-check-circle"></i> Recipe ingredients available'
-            : '<i class="fas fa-times-circle"></i> No Recipe ingredients available - Create recipe ingredients first'
-        );
-    });
-  } else {
-    // Clear ingredient status if no recipe selected
-    $("#ingredientesStatus")
-      .removeClass("checking available unavailable")
-      .addClass("checking")
-      .html('<i class="fas fa-info-circle"></i> Select a recipe first');
-  }
-}
-
+// Only calculation-related functions
 function calculateRecipeCosts() {
   const recipeId = $("#receta_select").val();
+  console.log("Calculating costs for recipe:", recipeId);
 
   if (!recipeId || recipeId === "") {
     resetCalculations();
     return;
   }
-
-  console.log("Calculating costs for recipe:", recipeId);
 
   $.get("includes/get_recipe_ingredients_costs.php", { recipe_id: recipeId })
     .done(function (data) {
@@ -104,8 +32,46 @@ function calculateRecipeCosts() {
         const impuestoConsumo =
           parseFloat($("#impuesto_consumo_porcentaje").val()) || 13;
 
-        // Update all calculations
-        // ... rest of your calculation code ...
+        console.log("Initial values:", {
+          costoTotalMateriaPrima,
+          margenError,
+          numeroPorciones,
+          porcentajeCostoMP,
+          impuestoConsumo,
+        });
+
+        // Update all form fields with calculations
+        $("#costo_total_materia_prima").val(costoTotalMateriaPrima.toFixed(2));
+
+        const margenErrorValue = costoTotalMateriaPrima * (margenError / 100);
+        const costoTotalPreparacion = costoTotalMateriaPrima + margenErrorValue;
+        $("#costo_total_preparacion").val(costoTotalPreparacion.toFixed(2));
+
+        const costoPorPorcion = costoTotalPreparacion / numeroPorciones;
+        $("#costo_por_porcion").val(costoPorPorcion.toFixed(2));
+
+        const precioPotencialVenta =
+          costoPorPorcion / (porcentajeCostoMP / 100);
+        $("#precio_potencial_venta").val(precioPotencialVenta.toFixed(2));
+
+        const impuestoConsumoValue =
+          precioPotencialVenta * (impuestoConsumo / 100);
+        const precioVentaSugerido = precioPotencialVenta + impuestoConsumoValue;
+        $("#precio_venta").val(precioVentaSugerido.toFixed(2));
+
+        const precioRealVentaSinIVA =
+          precioVentaSugerido / (1 + impuestoConsumo / 100);
+        $("#precio_real_venta").val(precioRealVentaSinIVA.toFixed(2));
+
+        const ivaCobradoPorPorcion =
+          precioVentaSugerido - precioRealVentaSinIVA;
+        $("#iva_por_porcion").val(ivaCobradoPorPorcion.toFixed(2));
+
+        const porcentajeRealCostoMP =
+          (costoPorPorcion / precioRealVentaSinIVA) * 100;
+        $("#porcentaje_real_costo").val(porcentajeRealCostoMP.toFixed(2));
+
+        console.log("Calculations completed successfully");
       } catch (error) {
         console.error("Error in calculations:", error);
         showToast("Error in calculations: " + error.message, "danger");
@@ -136,76 +102,17 @@ function resetCalculations() {
   });
 }
 
-// Initialize when document is ready
+// Only bind calculation-specific events
 $(document).ready(function () {
-  console.log("Document ready"); // Debug log
-
-  // Only load recipes initially, don't calculate
-  loadRecipeOptions();
-
-  // Load recipes when the costos_receta tab is shown
-  $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
-    console.log("Costos Receta tab shown"); // Debug log
-    loadRecipeOptions();
-    // Don't calculate here, wait for recipe selection
-  });
-
-  // Handle recipe selection change
-  $("#receta_select").on("change", function () {
-    console.log("Recipe selection changed"); // Debug log
-    const recipeId = $(this).val();
-    if (recipeId && recipeId !== "") {
-      calculateRecipeCosts();
-    } else {
-      resetCalculations();
-    }
-    updateDependencyStatus();
-  });
-
   // Handle input changes that should trigger recalculation
   $(
     "#margen_error_porcentaje, #porcentaje_costo_mp, #impuesto_consumo_porcentaje"
   ).on("input", function () {
-    const recipeId = $("#receta_select").val();
-    if (recipeId && recipeId !== "") {
-      console.log("Input value changed"); // Debug log
-      calculateRecipeCosts();
+    if ($("#costos_receta").hasClass("active")) {
+      const recipeId = $("#receta_select").val();
+      if (recipeId && recipeId !== "") {
+        calculateRecipeCosts();
+      }
     }
-  });
-
-  // Form submission handler
-  $("#costosRecetaForm").on("submit", function (e) {
-    e.preventDefault();
-
-    const recipeId = $("#receta_select").val();
-    if (!recipeId || recipeId === "") {
-      showToast("Please select a recipe first", "warning");
-      return;
-    }
-
-    // Get form data
-    const formData = new FormData(this);
-
-    // Submit form data
-    $.ajax({
-      url: "process.php",
-      type: "POST",
-      data: formData,
-      processData: false,
-      contentType: false,
-      success: function (response) {
-        if (response.success) {
-          showToast(response.message, "success");
-          resetCalculations();
-          $("#costosRecetaForm")[0].reset();
-          loadRecipeOptions();
-        } else {
-          showToast(response.message || "Error saving recipe costs", "danger");
-        }
-      },
-      error: function () {
-        showToast("Error saving recipe costs", "danger");
-      },
-    });
   });
 });
