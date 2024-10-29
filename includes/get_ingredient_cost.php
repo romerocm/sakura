@@ -109,6 +109,13 @@ try {
     // Log total cost for debugging
     error_log("Total cost calculated: $totalCost");
     
+    // Make sure recipe has numeric values
+    if (isset($recipe['numero_porciones'])) {
+        $recipe['numero_porciones'] = floatval($recipe['numero_porciones']);
+    } else {
+        $recipe['numero_porciones'] = 1; // Default to 1 if not set
+    }
+
     // Prepare response
     $response = [
         'success' => true,

@@ -1,4 +1,3 @@
-// Recipe costs calculation module
 function loadRecipeOptions() {
   console.log("Loading recipes..."); // Debug log
 
@@ -7,9 +6,14 @@ function loadRecipeOptions() {
     .prop("disabled", true)
     .html('<option value="">Loading recipes...</option>');
 
-  $.get("includes/get_recipes.php")
-    .done(function (data) {
-      console.log("Recipes data received:", data);
+  // Use jQuery get with explicit content type
+  $.ajax({
+    url: "includes/get_recipes.php",
+    method: "GET",
+    dataType: "html",
+    success: function (data) {
+      console.log("Recipes HTML received");
+      // Directly insert the HTML
       $("#receta_select").html(data).prop("disabled", false);
 
       // After loading recipes, update dependency status
@@ -20,14 +24,15 @@ function loadRecipeOptions() {
       if (selectedRecipe) {
         calculateRecipeCosts();
       }
-    })
-    .fail(function (error) {
-      console.error("Error loading recipes:", error);
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error("Error loading recipes:", textStatus, errorThrown);
       $("#receta_select")
         .html('<option value="">Error loading recipes</option>')
         .prop("disabled", false);
-      showToast("Error loading recipes: " + error.statusText, "danger");
-    });
+      showToast("Error loading recipes", "danger");
+    },
+  });
 }
 
 function updateDependencyStatus() {
@@ -188,19 +193,14 @@ function resetCalculations() {
 
 // Initialize when document is ready
 $(document).ready(function () {
-  console.log("Document ready"); // Debug log
+  console.log("Document ready, loading recipes..."); // Debug log
+  loadRecipeOptions();
 
   // Load recipes when the costos_receta tab is shown
   $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
     console.log("Costos Receta tab shown"); // Debug log
     loadRecipeOptions();
   });
-
-  // Also load if we're already on the costos_receta tab
-  if ($("#costos_receta").hasClass("show active")) {
-    console.log("Costos Receta tab is active on load"); // Debug log
-    loadRecipeOptions();
-  }
 
   // Handle recipe selection change
   $("#receta_select").on("change", function () {
@@ -244,6 +244,7 @@ $(document).ready(function () {
           showToast(response.message, "success");
           resetCalculations();
           $("#costosRecetaForm")[0].reset();
+          loadRecipeOptions();
         } else {
           showToast(response.message || "Error saving recipe costs", "danger");
         }
@@ -253,7 +254,4 @@ $(document).ready(function () {
       },
     });
   });
-
-  // Add immediate load if needed
-  loadRecipeOptions();
 });
