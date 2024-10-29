@@ -1,21 +1,33 @@
 // Recipe costs calculation module
 function loadRecipeOptions() {
   console.log("Loading recipes..."); // Debug log
-  $.get("includes/get_recipes.php", function (data) {
-    $("#receta_select").html(data);
 
-    // After loading recipes, update dependency status
-    updateDependencyStatus();
+  // Show loading state
+  $("#receta_select")
+    .prop("disabled", true)
+    .html('<option value="">Loading recipes...</option>');
 
-    // Check if we should calculate costs (if recipe is selected)
-    const selectedRecipe = $("#receta_select").val();
-    if (selectedRecipe) {
-      calculateRecipeCosts();
-    }
-  }).fail(function (error) {
-    console.error("Error loading recipes:", error);
-    showToast("Error loading recipes", "danger");
-  });
+  $.get("includes/get_recipes.php")
+    .done(function (data) {
+      console.log("Recipes data received:", data);
+      $("#receta_select").html(data).prop("disabled", false);
+
+      // After loading recipes, update dependency status
+      updateDependencyStatus();
+
+      // Check if we should calculate costs (if recipe is selected)
+      const selectedRecipe = $("#receta_select").val();
+      if (selectedRecipe) {
+        calculateRecipeCosts();
+      }
+    })
+    .fail(function (error) {
+      console.error("Error loading recipes:", error);
+      $("#receta_select")
+        .html('<option value="">Error loading recipes</option>')
+        .prop("disabled", false);
+      showToast("Error loading recipes: " + error.statusText, "danger");
+    });
 }
 
 function updateDependencyStatus() {
@@ -93,45 +105,52 @@ function calculateRecipeCosts() {
         const impuestoConsumo =
           parseFloat($("#impuesto_consumo_porcentaje").val()) || 13;
 
-        // Excel formula implementations
-        // 1. COSTO TOTAL DE LA MATERIA PRIMA (sum of ingredients costs)
+        console.log("Initial values:", {
+          costoTotalMateriaPrima,
+          margenError,
+          numeroPorciones,
+          porcentajeCostoMP,
+          impuestoConsumo,
+        });
+
+        // 1. COSTO TOTAL DE LA MATERIA PRIMA
         $("#costo_total_materia_prima").val(costoTotalMateriaPrima.toFixed(2));
 
-        // 2. MARGEN DE ERROR Ó VARIACION (10%) = PRODUCT(H632)*(I631)
+        // 2. MARGEN DE ERROR
         const margenErrorValue = costoTotalMateriaPrima * (margenError / 100);
 
-        // 3. COSTO TOTAL DE LA PREPARACION = SUM(I631:I632)
+        // 3. COSTO TOTAL DE LA PREPARACION
         const costoTotalPreparacion = costoTotalMateriaPrima + margenErrorValue;
         $("#costo_total_preparacion").val(costoTotalPreparacion.toFixed(2));
 
-        // 4. COSTO POR PORCION = I633/D614
+        // 4. COSTO POR PORCION
         const costoPorPorcion = costoTotalPreparacion / numeroPorciones;
         $("#costo_por_porcion").val(costoPorPorcion.toFixed(2));
 
-        // 5. PRECIO POTENCIAL DE VENTA = I634/H635
+        // 5. PRECIO POTENCIAL DE VENTA
         const precioPotencialVenta =
           costoPorPorcion / (porcentajeCostoMP / 100);
         $("#precio_potencial_venta").val(precioPotencialVenta.toFixed(2));
 
-        // 6. IMPUESTO AL CONSUMO(13%) = I636*H637
+        // 6. IMPUESTO AL CONSUMO
         const impuestoConsumoValue =
           precioPotencialVenta * (impuestoConsumo / 100);
 
-        // 7. PRECIO VENTA SUGERIDO = I636+I637
+        // 7. PRECIO VENTA SUGERIDO
         const precioVentaSugerido = precioPotencialVenta + impuestoConsumoValue;
         $("#precio_venta").val(precioVentaSugerido.toFixed(2));
 
-        // 8. PRECIO REAL DE VENTA (SIN IVA) = I639/1.13
+        // 8. PRECIO REAL DE VENTA (SIN IVA)
         const precioRealVentaSinIVA =
           precioVentaSugerido / (1 + impuestoConsumo / 100);
         $("#precio_real_venta").val(precioRealVentaSinIVA.toFixed(2));
 
-        // 9. IVA COBRADO POR PORCION (13%) = I639-I640
+        // 9. IVA COBRADO POR PORCION
         const ivaCobradoPorPorcion =
           precioVentaSugerido - precioRealVentaSinIVA;
         $("#iva_por_porcion").val(ivaCobradoPorPorcion.toFixed(2));
 
-        // 10. % REAL DE COSTO MATERIA PRIMA = I634/I640
+        // 10. % REAL DE COSTO MATERIA PRIMA
         const porcentajeRealCostoMP =
           (costoPorPorcion / precioRealVentaSinIVA) * 100;
         $("#porcentaje_real_costo").val(porcentajeRealCostoMP.toFixed(2));
@@ -169,6 +188,8 @@ function resetCalculations() {
 
 // Initialize when document is ready
 $(document).ready(function () {
+  console.log("Document ready"); // Debug log
+
   // Load recipes when the costos_receta tab is shown
   $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
     console.log("Costos Receta tab shown"); // Debug log
@@ -232,4 +253,7 @@ $(document).ready(function () {
       },
     });
   });
+
+  // Add immediate load if needed
+  loadRecipeOptions();
 });

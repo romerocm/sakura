@@ -12,9 +12,15 @@ try {
     $database = new Database();
     $db = $database->connect();
     
-    // Get recipe details
-    $recipeQuery = "SELECT re.receta_id, re.nombre_receta, re.numero_porciones, 
-                           re.categoria_id, re.numero_preparacion, re.fecha_elaboracion
+    error_log("Fetching recipe data for ID: " . $_GET['recipe_id']);
+    
+    // Get recipe details first
+    $recipeQuery = "SELECT re.receta_id, 
+                           re.nombre_receta, 
+                           re.numero_preparacion,
+                           re.numero_porciones,
+                           re.fecha_elaboracion,
+                           re.categoria_id
                     FROM receta_estandar re 
                     WHERE re.receta_id = :recipe_id";
                     
@@ -24,17 +30,24 @@ try {
     $recipe = $recipeStmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$recipe) {
+        error_log("Recipe not found for ID: " . $_GET['recipe_id']);
         echo json_encode(['error' => 'Recipe not found']);
         exit;
     }
+
+    // Log recipe details for debugging
+    error_log("Recipe found: " . print_r($recipe, true));
     
     // Get recipe ingredients with their costs
-    $ingredientsQuery = "SELECT ri.ingrediente_id, 
+    $ingredientsQuery = "SELECT ri.receta_ingredientes_id,
+                               ri.ingrediente_id, 
                                ri.cantidad,
                                ri.costo_total,
                                i.nombre as ingrediente_nombre,
                                i.costo_unitario,
-                               um.nombre as unidad_medida
+                               i.descripcion as ingrediente_descripcion,
+                               um.nombre as unidad_medida,
+                               um.unidad_id
                         FROM receta_ingredientes ri
                         JOIN ingrediente i ON ri.ingrediente_id = i.ingrediente_id
                         JOIN unidad_medida um ON i.unidad_id = um.unidad_id
@@ -44,9 +57,37 @@ try {
     $ingredientsStmt->bindParam(':recipe_id', $_GET['recipe_id']);
     $ingredientsStmt->execute();
     $ingredients = $ingredientsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Log ingredients count for debugging
+    error_log("Found " . count($ingredients) . " ingredients for recipe");
+    
+    // Calculate total raw material cost and normalize numeric values
+    $totalCost = 0;
+    foreach ($ingredients as &$ingredient) {
+        // Ensure numeric values
+        $ingredient['cantidad'] = floatval($ingredient['cantidad']);
+        $ingredient['costo_unitario'] = floatval($ingredient['costo_unitario']);
+        $ingredient['costo_total'] = floatval($ingredient['costo_total']);
+        
+        $totalCost += $ingredient['costo_total'];
+    }
     
     // Get existing recipe costs if any
-    $costsQuery = "SELECT * FROM costos_receta 
+    $costsQuery = "SELECT costo_receta_id,
+                          receta_id,
+                          costo_total_materia_prima,
+                          margen_error_porcentaje,
+                          costo_total_preparacion,
+                          costo_por_porcion,
+                          porcentaje_costo_mp,
+                          precio_potencial_venta,
+                          impuesto_consumo_porcentaje,
+                          precio_venta,
+                          precio_carta,
+                          precio_real_venta,
+                          iva_por_porcion,
+                          porcentaje_real_costo
+                   FROM costos_receta 
                    WHERE receta_id = :recipe_id 
                    ORDER BY costo_receta_id DESC LIMIT 1";
                    
@@ -55,11 +96,18 @@ try {
     $costsStmt->execute();
     $existingCosts = $costsStmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate total raw material cost
-    $totalCost = 0;
-    foreach ($ingredients as $ingredient) {
-        $totalCost += floatval($ingredient['costo_total']);
+    if ($existingCosts) {
+        // Convert numeric values
+        foreach ($existingCosts as $key => $value) {
+            if ($key !== 'costo_receta_id' && $key !== 'receta_id') {
+                $existingCosts[$key] = floatval($value);
+            }
+        }
+        error_log("Found existing costs: " . print_r($existingCosts, true));
     }
+
+    // Log total cost for debugging
+    error_log("Total cost calculated: $totalCost");
     
     // Prepare response
     $response = [
@@ -73,10 +121,12 @@ try {
         ]
     ];
     
+    error_log("Sending response: " . json_encode($response));
     echo json_encode($response);
     
 } catch(PDOException $e) {
     error_log("Database Error in get_recipe_ingredients_costs.php: " . $e->getMessage());
+    error_log("SQL State: " . $e->getCode());
     echo json_encode([
         'error' => 'Database error occurred',
         'details' => $e->getMessage()
