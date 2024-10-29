@@ -133,12 +133,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             case 'receta':
                 if (!empty($_POST['receta_id'])) {
-                    $query = "INSERT INTO receta_standar (receta_id, nombre_receta, categoria_id, numero_preparacion, fecha_elaboracion, numero_porciones) 
+                    $query = "INSERT INTO receta_estandar (receta_id, nombre_receta, categoria_id, numero_preparacion, fecha_elaboracion, numero_porciones) 
                              VALUES (:receta_id, :nombre_receta, :categoria_id, :numero_preparacion, :fecha_elaboracion, :numero_porciones)";
                     $stmt = $db->prepare($query);
                     $stmt->bindParam(':receta_id', $_POST['receta_id']);
                 } else {
-                    $query = "INSERT INTO receta_standar (nombre_receta, categoria_id, numero_preparacion, fecha_elaboracion, numero_porciones) 
+                    $query = "INSERT INTO receta_estandar (nombre_receta, categoria_id, numero_preparacion, fecha_elaboracion, numero_porciones) 
                              VALUES (:nombre_receta, :categoria_id, :numero_preparacion, :fecha_elaboracion, :numero_porciones)";
                     $stmt = $db->prepare($query);
                 }
