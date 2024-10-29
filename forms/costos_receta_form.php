@@ -35,28 +35,29 @@
             </label>
         </div>
 
-        <!-- Manual ID Input (hidden by default) -->
+        <!-- Manual ID Input -->
         <div class="mb-3 id-input" id="costosRecetaIdInput">
             <label for="costo_receta_id" class="form-label">ID</label>
             <input type="number" class="form-control" name="costo_receta_id" min="1">
         </div>
 
-        <!-- Required Foreign Keys -->
+        <!-- Recipe Selection -->
         <div class="mb-3">
-            <label for="receta_id" class="form-label">Receta</label>
+            <label for="receta_select" class="form-label">Receta</label>
             <select class="form-control" id="receta_select" name="receta_id" required>
                 <option value="">Select Recipe</option>
             </select>
         </div>
 
+        <!-- Recipe Ingredients Selection -->
         <div class="mb-3">
-            <label for="receta_ingredientes_id" class="form-label">Receta Ingredientes</label>
+            <label for="receta_ingredientes_select" class="form-label">Receta Ingredientes</label>
             <select class="form-control" id="receta_ingredientes_select" name="receta_ingredientes_id" required>
                 <option value="">Select Recipe Ingredients</option>
             </select>
         </div>
 
-        <!-- Cost Fields -->
+        <!-- Raw Material Costs -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -64,22 +65,23 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="costo_total_materia_prima" 
-                               name="costo_total_materia_prima" required>
+                               name="costo_total_materia_prima" readonly>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="margen_error_porcentaje" class="form-label">Margen Error Porcentaje</label>
+                    <label for="margen_error_porcentaje" class="form-label">Margen Error (%)</label>
                     <div class="input-group">
                         <input type="number" step="0.01" class="form-control" id="margen_error_porcentaje" 
-                               name="margen_error_porcentaje" required>
+                               name="margen_error_porcentaje" value="10">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Preparation Costs -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -87,7 +89,7 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="costo_total_preparacion" 
-                               name="costo_total_preparacion" required>
+                               name="costo_total_preparacion" readonly>
                     </div>
                 </div>
             </div>
@@ -97,19 +99,20 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="costo_por_porcion" 
-                               name="costo_por_porcion" required>
+                               name="costo_por_porcion" readonly>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Cost Percentages -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="porcentaje_costo_mp" class="form-label">Porcentaje Costo MP</label>
+                    <label for="porcentaje_costo_mp" class="form-label">% Costo MP</label>
                     <div class="input-group">
                         <input type="number" step="0.01" class="form-control" id="porcentaje_costo_mp" 
-                               name="porcentaje_costo_mp" required>
+                               name="porcentaje_costo_mp" value="35">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
@@ -120,19 +123,20 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_potencial_venta" 
-                               name="precio_potencial_venta" required>
+                               name="precio_potencial_venta" readonly>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Sales Tax and Pricing -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="impuesto_consumo_porcentaje" class="form-label">Impuesto Consumo Porcentaje</label>
+                    <label for="impuesto_consumo_porcentaje" class="form-label">Impuesto Consumo (%)</label>
                     <div class="input-group">
                         <input type="number" step="0.01" class="form-control" id="impuesto_consumo_porcentaje" 
-                               name="impuesto_consumo_porcentaje" required>
+                               name="impuesto_consumo_porcentaje" value="13">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
@@ -143,12 +147,13 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_venta" 
-                               name="precio_venta" required>
+                               name="precio_venta" readonly>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Menu Price and Real Sales Price -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -156,7 +161,7 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_carta" 
-                               name="precio_carta" required>
+                               name="precio_carta">
                     </div>
                 </div>
             </div>
@@ -166,12 +171,13 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="precio_real_venta" 
-                               name="precio_real_venta" required>
+                               name="precio_real_venta" readonly>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- VAT and Real Cost -->
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -179,69 +185,26 @@
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" id="iva_por_porcion" 
-                               name="iva_por_porcion" required>
+                               name="iva_por_porcion" readonly>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="porcentaje_real_costo" class="form-label">Porcentaje Real Costo</label>
+                    <label for="porcentaje_real_costo" class="form-label">% Real de Costo</label>
                     <div class="input-group">
                         <input type="number" step="0.01" class="form-control" id="porcentaje_real_costo" 
-                               name="porcentaje_real_costo" required>
+                               name="porcentaje_real_costo" readonly>
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Recipe Costs
+        </button>
     </form>
 </div>
 
-<style>
-    .status-item {
-        margin: 5px 0;
-        padding: 5px 0;
-    }
-    .status-item.available {
-        color: green;
-    }
-    .status-item.unavailable {
-        color: red;
-    }
-    .dependency-status {
-        margin-top: 15px;
-    }
-</style>
-
-<script>
-function checkDependencies() {
-    // Check for recipes
-    $.get('includes/get_recipes.php', function(data) {
-        const hasRecipes = $(data).filter('option[value!=""]').length > 0;
-        $('#recetaStatus')
-            .removeClass('available unavailable')
-            .addClass(hasRecipes ? 'available' : 'unavailable')
-            .html(hasRecipes ? 
-                '<i class="fas fa-check-circle"></i> Recipes available' : 
-                '<i class="fas fa-times-circle"></i> No recipes available - Create a recipe first');
-    });
-
-    // Check for recipe ingredients
-    $.get('includes/get_recipe_costs.php', function(data) {
-        const hasIngredients = $(data).filter('option[value!=""]').length > 0;
-        $('#ingredientesStatus')
-            .removeClass('available unavailable')
-            .addClass(hasIngredients ? 'available' : 'unavailable')
-            .html(hasIngredients ? 
-                '<i class="fas fa-check-circle"></i> Recipe ingredients available' : 
-                '<i class="fas fa-times-circle"></i> No recipe ingredients available - Add ingredients to recipes first');
-    });
-}
-
-// Run dependency check when tab is shown
-$('button[data-bs-target="#costos_receta"]').on('shown.bs.tab', function (e) {
-    checkDependencies();
-});
-</script>
+<script src="js/recipe-costs.js"></script>

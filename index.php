@@ -192,6 +192,7 @@
     <script src="js/form-handlers.js"></script>
     <script src="js/toast.js"></script>
     <script src="js/dependencies.js"></script>
+    <script src="js/recipe-costs.js"></script>
 
     <script>
         // Form handling
