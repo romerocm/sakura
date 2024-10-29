@@ -1,6 +1,78 @@
 // Recipe costs calculation module
+
+function loadRecipeOptions() {
+  console.log("Loading recipes..."); // Debug log
+  $.get("includes/get_recipes.php", function (data) {
+    $("#receta_select").html(data);
+
+    // After loading recipes, check if we need to load ingredients
+    const selectedRecipe = $("#receta_select").val();
+    if (selectedRecipe) {
+      loadRecipeIngredients(selectedRecipe);
+    }
+
+    // Update dependency status
+    updateDependencyStatus();
+  }).fail(function (error) {
+    console.error("Error loading recipes:", error);
+    showToast("Error loading recipes", "danger");
+  });
+}
+
+function loadRecipeIngredients(recipeId) {
+  if (!recipeId) return;
+
+  $.get(
+    "includes/get_recipe_ingredients.php",
+    { recipe_id: recipeId },
+    function (data) {
+      $("#receta_ingredientes_select").html(data);
+      calculateRecipeCosts();
+    }
+  ).fail(function (error) {
+    console.error("Error loading recipe ingredients:", error);
+    showToast("Error loading recipe ingredients", "danger");
+  });
+}
+
+function updateDependencyStatus() {
+  // Check for recipes
+  $.get("includes/get_recipes.php", function (data) {
+    console.log("Checking recipes status..."); // Debug log
+    const hasRecipes = $(data).filter('option[value!=""]').length > 0;
+    $("#recetaStatus")
+      .removeClass("checking available unavailable")
+      .addClass(hasRecipes ? "available" : "unavailable")
+      .html(
+        hasRecipes
+          ? '<i class="fas fa-check-circle"></i> Recipes available'
+          : '<i class="fas fa-times-circle"></i> No recipes available - Create a recipe first'
+      );
+  });
+
+  // Check for recipe ingredients if a recipe is selected
+  const recipeId = $("#receta_select").val();
+  if (recipeId) {
+    $.get(
+      "includes/get_recipe_ingredients_costs.php",
+      { recipe_id: recipeId },
+      function (data) {
+        console.log("Checking recipe ingredients status..."); // Debug log
+        const hasIngredients = data.ingredients && data.ingredients.length > 0;
+        $("#ingredientesStatus")
+          .removeClass("checking available unavailable")
+          .addClass(hasIngredients ? "available" : "unavailable")
+          .html(
+            hasIngredients
+              ? '<i class="fas fa-check-circle"></i> Recipe ingredients available'
+              : '<i class="fas fa-times-circle"></i> No Recipe ingredients available - Create recipe ingredients first'
+          );
+      }
+    );
+  }
+}
+
 function calculateRecipeCosts() {
-  // Get the selected recipe ID
   const recipeId = $("#receta_select").val();
 
   if (!recipeId) {
@@ -8,7 +80,8 @@ function calculateRecipeCosts() {
     return;
   }
 
-  // Fetch recipe details and ingredients costs
+  console.log("Calculating costs for recipe:", recipeId); // Debug log
+
   $.get(
     "includes/get_recipe_ingredients_costs.php",
     { recipe_id: recipeId },
@@ -19,17 +92,19 @@ function calculateRecipeCosts() {
         return;
       }
 
+      console.log("Recipe data received:", data); // Debug log
       updateCalculations(data);
     }
-  ).fail(function (jqXHR, textStatus, errorThrown) {
-    showToast("Error fetching recipe data: " + textStatus, "danger");
+  ).fail(function (error) {
+    console.error("Error calculating recipe costs:", error);
+    showToast("Error calculating recipe costs", "danger");
     resetCalculations();
   });
 }
 
 function updateCalculations(data) {
   try {
-    // Get basic values from data
+    // Get basic values
     const costoTotalMateriaPrima = data.ingredients.reduce(
       (sum, item) => sum + parseFloat(item.costo_total || 0),
       0
@@ -42,10 +117,18 @@ function updateCalculations(data) {
     const impuestoConsumo =
       parseFloat($("#impuesto_consumo_porcentaje").val()) || 13;
 
+    console.log("Calculating with values:", {
+      costoTotalMateriaPrima,
+      margenError,
+      numeroPorciones,
+      porcentajeCostoMP,
+      impuestoConsumo,
+    }); // Debug log
+
     // 1. Costo Total Materia Prima
     $("#costo_total_materia_prima").val(costoTotalMateriaPrima.toFixed(2));
 
-    // 2. Margen de Error Value (10% by default)
+    // 2. Margen de Error Value
     const margenErrorValue = costoTotalMateriaPrima * (margenError / 100);
 
     // 3. Costo Total Preparación
@@ -104,21 +187,43 @@ function resetCalculations() {
   });
 }
 
-// Event Listeners
+// Initialize when document is ready
 $(document).ready(function () {
-  // Recalculate when these inputs change
-  $(
-    "#receta_select, #margen_error_porcentaje, #porcentaje_costo_mp, #impuesto_consumo_porcentaje"
-  ).on("change input", calculateRecipeCosts);
+  // Load recipes when the costos_receta tab is shown
+  $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
+    console.log("Costos Receta tab shown"); // Debug log
+    loadRecipeOptions();
+  });
 
-  // Initial calculation if recipe is already selected
-  if ($("#receta_select").val()) {
-    calculateRecipeCosts();
+  // Also load if we're already on the costos_receta tab
+  if ($("#costos_receta").hasClass("show active")) {
+    console.log("Costos Receta tab is active on load"); // Debug log
+    loadRecipeOptions();
   }
+
+  // Handle recipe selection change
+  $("#receta_select").on("change", function () {
+    console.log("Recipe selection changed"); // Debug log
+    const recipeId = $(this).val();
+    if (recipeId) {
+      loadRecipeIngredients(recipeId);
+    } else {
+      resetCalculations();
+    }
+  });
+
+  // Handle input changes that should trigger recalculation
+  $(
+    "#margen_error_porcentaje, #porcentaje_costo_mp, #impuesto_consumo_porcentaje"
+  ).on("input", function () {
+    console.log("Input value changed"); // Debug log
+    calculateRecipeCosts();
+  });
 
   // Form submission handler
   $("#costosRecetaForm").on("submit", function (e) {
     e.preventDefault();
+    console.log("Form submitted"); // Debug log
 
     // Ensure all calculations are up to date
     calculateRecipeCosts();

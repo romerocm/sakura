@@ -46,6 +46,23 @@
             <label for="receta_select" class="form-label">Receta</label>
             <select class="form-control" id="receta_select" name="receta_id" required>
                 <option value="">Select Recipe</option>
+                <?php
+                try {
+                    $database = new Database();
+                    $db = $database->connect();
+                    
+                    $query = "SELECT receta_id, nombre_receta FROM receta_estandar ORDER BY nombre_receta";
+                    $stmt = $db->prepare($query);
+                    $stmt->execute();
+                    
+                    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        echo "<option value='" . htmlspecialchars($row['receta_id']) . "'>" 
+                             . htmlspecialchars($row['nombre_receta']) . "</option>";
+                    }
+                } catch(PDOException $e) {
+                    error_log("Error loading recipes in costos_receta_form: " . $e->getMessage());
+                }
+                ?>
             </select>
         </div>
 
@@ -206,5 +223,3 @@
         </button>
     </form>
 </div>
-
-<script src="js/recipe-costs.js"></script>
