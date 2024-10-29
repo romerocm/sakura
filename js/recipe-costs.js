@@ -12,11 +12,11 @@ function loadRecipeOptions() {
     method: "GET",
     dataType: "html",
     success: function (data) {
-      console.log("Recipes HTML received:", data);
+      console.log("Recipes HTML received");
       // Directly insert the HTML
       $("#receta_select").html(data).prop("disabled", false);
 
-      // After loading recipes, only update dependency status
+      // Only update dependency status, don't calculate
       updateDependencyStatus();
     },
     error: function (jqXHR, textStatus, errorThrown) {
@@ -44,84 +44,149 @@ function updateDependencyStatus() {
       );
   });
 
-  // Only check for ingredients if we're on the costos_receta tab
-  if ($("#costos_receta").hasClass("active")) {
-    const recipeId = $("#receta_select").val();
-    if (recipeId) {
-      $.get("includes/get_recipe_ingredients_costs.php", {
-        recipe_id: recipeId,
-      })
-        .done(function (data) {
-          console.log("Checking recipe ingredients status..."); // Debug log
-          const hasIngredients =
-            data.ingredients && data.ingredients.length > 0;
-          $("#ingredientesStatus")
-            .removeClass("checking available unavailable")
-            .addClass(hasIngredients ? "available" : "unavailable")
-            .html(
-              hasIngredients
-                ? '<i class="fas fa-check-circle"></i> Recipe ingredients available'
-                : '<i class="fas fa-times-circle"></i> No Recipe ingredients available - Create recipe ingredients first'
-            );
-
-          // Only calculate costs if we're on the costos_receta tab
-          if ($("#costos_receta").hasClass("active")) {
-            calculateRecipeCosts();
-          }
-        })
-        .fail(function (error) {
-          console.error("Error checking ingredients:", error);
-          $("#ingredientesStatus")
-            .removeClass("checking available unavailable")
-            .addClass("unavailable")
-            .html(
-              '<i class="fas fa-times-circle"></i> Error checking recipe ingredients'
-            );
-        });
-    }
+  // Check for recipe ingredients only if a recipe is selected
+  const recipeId = $("#receta_select").val();
+  if (recipeId && recipeId !== "") {
+    $.get("includes/get_recipe_ingredients_costs.php", {
+      recipe_id: recipeId,
+    }).done(function (data) {
+      console.log("Checking recipe ingredients status..."); // Debug log
+      const hasIngredients = data.ingredients && data.ingredients.length > 0;
+      $("#ingredientesStatus")
+        .removeClass("checking available unavailable")
+        .addClass(hasIngredients ? "available" : "unavailable")
+        .html(
+          hasIngredients
+            ? '<i class="fas fa-check-circle"></i> Recipe ingredients available'
+            : '<i class="fas fa-times-circle"></i> No Recipe ingredients available - Create recipe ingredients first'
+        );
+    });
+  } else {
+    // Clear ingredient status if no recipe selected
+    $("#ingredientesStatus")
+      .removeClass("checking available unavailable")
+      .addClass("checking")
+      .html('<i class="fas fa-info-circle"></i> Select a recipe first');
   }
+}
+
+function calculateRecipeCosts() {
+  const recipeId = $("#receta_select").val();
+
+  if (!recipeId || recipeId === "") {
+    resetCalculations();
+    return;
+  }
+
+  console.log("Calculating costs for recipe:", recipeId);
+
+  $.get("includes/get_recipe_ingredients_costs.php", { recipe_id: recipeId })
+    .done(function (data) {
+      if (data.error) {
+        showToast(data.error, "danger");
+        resetCalculations();
+        return;
+      }
+
+      try {
+        // Get basic values
+        const costoTotalMateriaPrima = data.ingredients.reduce(
+          (sum, item) => sum + parseFloat(item.costo_total || 0),
+          0
+        );
+
+        // Get form input values
+        const margenError =
+          parseFloat($("#margen_error_porcentaje").val()) || 10;
+        const numeroPorciones = parseFloat(data.recipe.numero_porciones) || 1;
+        const porcentajeCostoMP =
+          parseFloat($("#porcentaje_costo_mp").val()) || 35;
+        const impuestoConsumo =
+          parseFloat($("#impuesto_consumo_porcentaje").val()) || 13;
+
+        // Update all calculations
+        // ... rest of your calculation code ...
+      } catch (error) {
+        console.error("Error in calculations:", error);
+        showToast("Error in calculations: " + error.message, "danger");
+        resetCalculations();
+      }
+    })
+    .fail(function (error) {
+      console.error("Error fetching recipe data:", error);
+      showToast("Error calculating recipe costs", "danger");
+      resetCalculations();
+    });
+}
+
+function resetCalculations() {
+  const fieldsToReset = [
+    "costo_total_materia_prima",
+    "costo_total_preparacion",
+    "costo_por_porcion",
+    "precio_potencial_venta",
+    "precio_venta",
+    "precio_real_venta",
+    "iva_por_porcion",
+    "porcentaje_real_costo",
+  ];
+
+  fieldsToReset.forEach((fieldId) => {
+    $(`#${fieldId}`).val("0.00");
+  });
 }
 
 // Initialize when document is ready
 $(document).ready(function () {
   console.log("Document ready"); // Debug log
 
-  // Load recipes when any tab is shown
-  $(".nav-link").on("shown.bs.tab", function (e) {
-    console.log("Tab shown:", e.target); // Debug log
+  // Only load recipes initially, don't calculate
+  loadRecipeOptions();
+
+  // Load recipes when the costos_receta tab is shown
+  $('button[data-bs-target="#costos_receta"]').on("shown.bs.tab", function (e) {
+    console.log("Costos Receta tab shown"); // Debug log
     loadRecipeOptions();
+    // Don't calculate here, wait for recipe selection
   });
 
-  // Handle recipe selection change only in costos_receta tab
+  // Handle recipe selection change
   $("#receta_select").on("change", function () {
     console.log("Recipe selection changed"); // Debug log
     const recipeId = $(this).val();
-    if ($("#costos_receta").hasClass("active")) {
-      if (recipeId) {
-        calculateRecipeCosts();
-      } else {
-        resetCalculations();
-      }
+    if (recipeId && recipeId !== "") {
+      calculateRecipeCosts();
+    } else {
+      resetCalculations();
     }
+    updateDependencyStatus();
   });
 
   // Handle input changes that should trigger recalculation
   $(
     "#margen_error_porcentaje, #porcentaje_costo_mp, #impuesto_consumo_porcentaje"
   ).on("input", function () {
-    if ($("#costos_receta").hasClass("active")) {
+    const recipeId = $("#receta_select").val();
+    if (recipeId && recipeId !== "") {
       console.log("Input value changed"); // Debug log
       calculateRecipeCosts();
     }
   });
 
-  // Form submission handler with refresh of dependencies
-  $(".nav-item form").on("submit", function (e) {
+  // Form submission handler
+  $("#costosRecetaForm").on("submit", function (e) {
     e.preventDefault();
-    console.log("Form submitted"); // Debug log
 
+    const recipeId = $("#receta_select").val();
+    if (!recipeId || recipeId === "") {
+      showToast("Please select a recipe first", "warning");
+      return;
+    }
+
+    // Get form data
     const formData = new FormData(this);
 
+    // Submit form data
     $.ajax({
       url: "process.php",
       type: "POST",
@@ -131,22 +196,16 @@ $(document).ready(function () {
       success: function (response) {
         if (response.success) {
           showToast(response.message, "success");
-          // Reload dependencies after successful save
+          resetCalculations();
+          $("#costosRecetaForm")[0].reset();
           loadRecipeOptions();
-          // Reset form if needed
-          if ($("#costos_receta").hasClass("active")) {
-            resetCalculations();
-          }
         } else {
-          showToast(response.message || "Error saving data", "danger");
+          showToast(response.message || "Error saving recipe costs", "danger");
         }
       },
       error: function () {
-        showToast("Error saving data", "danger");
+        showToast("Error saving recipe costs", "danger");
       },
     });
   });
-
-  // Initial load of recipes
-  loadRecipeOptions();
 });
