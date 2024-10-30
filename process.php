@@ -112,19 +112,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             case 'ingrediente':
                 if (!empty($_POST['ingrediente_id'])) {
-                    $query = "INSERT INTO ingrediente (ingrediente_id, nombre, descripcion, costo_unitario, cantidad_disponible, unidad_id, is_active) 
-                             VALUES (:ingrediente_id, :nombre, :descripcion, :costo_unitario, :cantidad_disponible, :unidad_id, :is_active)";
+                    $query = "INSERT INTO ingrediente (ingrediente_id, nombre, descripcion, costo_unitario, unidad_id, is_active) 
+                             VALUES (:ingrediente_id, :nombre, :descripcion, :costo_unitario, :unidad_id, :is_active)";
                     $stmt = $db->prepare($query);
                     $stmt->bindParam(':ingrediente_id', $_POST['ingrediente_id']);
                 } else {
-                    $query = "INSERT INTO ingrediente (nombre, descripcion, costo_unitario, cantidad_disponible, unidad_id, is_active) 
-                             VALUES (:nombre, :descripcion, :costo_unitario, :cantidad_disponible, :unidad_id, :is_active)";
+                    $query = "INSERT INTO ingrediente (nombre, descripcion, costo_unitario, unidad_id, is_active) 
+                             VALUES (:nombre, :descripcion, :costo_unitario, :unidad_id, :is_active)";
                     $stmt = $db->prepare($query);
                 }
                 $stmt->bindParam(':nombre', $_POST['nombre']);
                 $stmt->bindParam(':descripcion', $_POST['descripcion']);
                 $stmt->bindParam(':costo_unitario', $_POST['costo_unitario']);
-                $stmt->bindParam(':cantidad_disponible', $_POST['cantidad_disponible']);
                 $stmt->bindParam(':unidad_id', $_POST['unidad_id']);
                 $stmt->bindParam(':is_active', $_POST['is_active']);
                 $stmt->execute();

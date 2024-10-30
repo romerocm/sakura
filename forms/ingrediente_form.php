@@ -76,14 +76,15 @@
                 </div>
             </div>
             <div class="col-md-6">
-
-        <!-- Status -->
-        <div class="mb-3">
-            <label for="is_active" class="form-label">Estado</label>
-            <select class="form-control" id="is_active" name="is_active" required>
-                <option value="1">Activo</option>
-                <option value="0">Inactivo</option>
-            </select>
+                <!-- Status -->
+                <div class="mb-3">
+                    <label for="is_active" class="form-label">Estado</label>
+                    <select class="form-control" id="is_active" name="is_active" required>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary">
