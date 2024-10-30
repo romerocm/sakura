@@ -76,14 +76,6 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <!-- Available Quantity -->
-                <div class="mb-3">
-                    <label for="cantidad_disponible" class="form-label">Cantidad Disponible</label>
-                    <input type="number" step="0.01" class="form-control" id="cantidad_disponible" 
-                           name="cantidad_disponible" required placeholder="0.00">
-                </div>
-            </div>
-        </div>
 
         <!-- Status -->
         <div class="mb-3">
