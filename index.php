@@ -23,6 +23,11 @@
         }
         .nav-pills .nav-link {
             margin-right: 5px;
+            color: #6c757d;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
         }
         .nav-pills .nav-link i {
             margin-right: 5px;
@@ -62,6 +67,13 @@
         .alert-info {
             border-left: 4px solid #0dcaf0;
         }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -70,22 +82,25 @@
         <div class="toast-container"></div>
 
         <!-- Main tab groups -->
-        <ul class="nav nav-pills mb-3" id="mainTab" role="tablist">
+        <ul class="nav nav-pills mb-4" id="mainTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="ingredients-tab" data-bs-toggle="pill" 
-                        data-bs-target="#ingredients-section" type="button" role="tab">
+                        data-bs-target="#ingredients-section" type="button" role="tab" 
+                        aria-controls="ingredients-section" aria-selected="true">
                     <i class="fas fa-carrot"></i> Ingredients Management
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="recipes-tab" data-bs-toggle="pill" 
-                        data-bs-target="#recipes-section" type="button" role="tab">
+                        data-bs-target="#recipes-section" type="button" role="tab"
+                        aria-controls="recipes-section" aria-selected="false">
                     <i class="fas fa-book"></i> Recipes Management
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="sales-tab" data-bs-toggle="pill" 
-                        data-bs-target="#sales-section" type="button" role="tab">
+                        data-bs-target="#sales-section" type="button" role="tab"
+                        aria-controls="sales-section" aria-selected="false">
                     <i class="fas fa-cash-register"></i> Sales Management
                 </button>
             </li>
@@ -94,7 +109,7 @@
         <!-- Tab content -->
         <div class="tab-content" id="mainTabContent">
             <!-- Ingredients Management Section -->
-            <div class="tab-pane fade show active" id="ingredients-section">
+            <div class="tab-pane fade show active" id="ingredients-section" role="tabpanel" aria-labelledby="ingredients-tab">
                 <h4 class="section-title"><i class="fas fa-carrot"></i> Ingredients Management</h4>
                 <ul class="nav nav-tabs" id="ingredientsTab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -116,17 +131,15 @@
                         </button>
                     </li>
                 </ul>
-                <div class="tab-content mt-3" id="ingredientsTabContent">
-                    <?php
-                    include 'forms/unidad_medida_form.php';
-                    include 'forms/categoria_form.php';
-                    include 'forms/ingrediente_form.php';
-                    ?>
+                <div class="tab-content" id="ingredientsTabContent">
+                    <?php include 'forms/unidad_medida_form.php'; ?>
+                    <?php include 'forms/categoria_form.php'; ?>
+                    <?php include 'forms/ingrediente_form.php'; ?>
                 </div>
             </div>
 
             <!-- Recipes Management Section -->
-            <div class="tab-pane fade" id="recipes-section">
+            <div class="tab-pane fade" id="recipes-section" role="tabpanel" aria-labelledby="recipes-tab">
                 <h4 class="section-title"><i class="fas fa-book"></i> Recipes Management</h4>
                 <ul class="nav nav-tabs" id="recipesTab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -148,17 +161,15 @@
                         </button>
                     </li>
                 </ul>
-                <div class="tab-content mt-3" id="recipesTabContent">
-                    <?php
-                    include 'forms/receta_form.php';
-                    include 'forms/receta_ingredientes_form.php';
-                    include 'forms/costos_receta_form.php';
-                    ?>
+                <div class="tab-content" id="recipesTabContent">
+                    <?php include 'forms/receta_form.php'; ?>
+                    <?php include 'forms/receta_ingredientes_form.php'; ?>
+                    <?php include 'forms/costos_receta_form.php'; ?>
                 </div>
             </div>
 
             <!-- Sales Management Section -->
-            <div class="tab-pane fade" id="sales-section">
+            <div class="tab-pane fade" id="sales-section" role="tabpanel" aria-labelledby="sales-tab">
                 <h4 class="section-title"><i class="fas fa-cash-register"></i> Sales Management</h4>
                 <ul class="nav nav-tabs" id="salesTab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -174,11 +185,9 @@
                         </button>
                     </li>
                 </ul>
-                <div class="tab-content mt-3" id="salesTabContent">
-                    <?php
-                    include 'forms/dim_order_form.php';
-                    include 'forms/fact_sales_form.php';
-                    ?>
+                <div class="tab-content" id="salesTabContent">
+                    <?php include 'forms/dim_order_form.php'; ?>
+                    <?php include 'forms/fact_sales_form.php'; ?>
                 </div>
             </div>
         </div>
