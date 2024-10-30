@@ -70,8 +70,13 @@
                     <label for="costo_unitario" class="form-label">Costo Unitario</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="costo_unitario" 
-                               name="costo_unitario" required placeholder="0.00">
+                        <input type="number" 
+                               step="0.000000001" 
+                               class="form-control" 
+                               id="costo_unitario" 
+                               name="costo_unitario" 
+                               required 
+                               placeholder="0.000000000">
                     </div>
                 </div>
             </div>
@@ -106,7 +111,23 @@ function checkIngredientDependencies() {
     });
 }
 
+// Initial check when page loads
+$(document).ready(function() {
+    if ($('#ingrediente').hasClass('active')) {
+        checkIngredientDependencies();
+    }
+});
+
+// Check dependencies when tab is shown
 $('button[data-bs-target="#ingrediente"]').on('shown.bs.tab', function (e) {
     checkIngredientDependencies();
+});
+
+// Format cost input to show proper decimal places
+$('#costo_unitario').on('change', function() {
+    const value = parseFloat(this.value);
+    if (!isNaN(value)) {
+        this.value = value.toFixed(9);
+    }
 });
 </script>
