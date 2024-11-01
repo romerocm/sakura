@@ -49,152 +49,230 @@
             </select>
         </div>
 
-        <!-- Cost Fields -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="costo_total_materia_prima" class="form-label">Costo Total Materia Prima</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="costo_total_materia_prima" 
-                               name="costo_total_materia_prima"  >
-                    </div>
-                </div>
+        <!-- Materia Prima Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Costo de Materia Prima</h5>
             </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="margen_error_porcentaje" class="form-label">Margen Error (%)</label>
-                    <div class="input-group">
-                        <input type="number" step="0.01" class="form-control" id="margen_error_porcentaje" 
-                               name="margen_error_porcentaje" value="10">
-                        <span class="input-group-text">%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preparation Costs -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="costo_total_preparacion" class="form-label">Costo Total Preparación</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="costo_total_preparacion" 
-                               name="costo_total_preparacion"  >
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="costo_por_porcion" class="form-label">Costo por Porción</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="costo_por_porcion" 
-                               name="costo_por_porcion"  >
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label for="costo_total_materia_prima" class="form-label">Costo Total Materia Prima</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="costo_total_materia_prima" 
+                                       name="costo_total_materia_prima" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Cost Percentages -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="porcentaje_costo_mp" class="form-label">% Costo MP</label>
-                    <div class="input-group">
-                        <input type="number" step="0.01" class="form-control" id="porcentaje_costo_mp" 
-                               name="porcentaje_costo_mp" value="35">
-                        <span class="input-group-text">%</span>
-                    </div>
-                </div>
+        <!-- Margen de Error Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Margen de Error</h5>
             </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="precio_potencial_venta" class="form-label">Precio Potencial Venta</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="precio_potencial_venta" 
-                               name="precio_potencial_venta"  >
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="margen_error_porcentaje" class="form-label">Porcentaje Margen Error</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="margen_error_porcentaje" 
+                                       name="margen_error_porcentaje" value="10">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sales Tax and Pricing -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="impuesto_consumo_porcentaje" class="form-label">Impuesto Consumo (%)</label>
-                    <div class="input-group">
-                        <input type="number" step="0.01" class="form-control" id="impuesto_consumo_porcentaje" 
-                               name="impuesto_consumo_porcentaje" value="13">
-                        <span class="input-group-text">%</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="precio_venta" class="form-label">Precio Venta Sugerido</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="precio_venta" 
-                               name="precio_venta"  >
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="margen_error_costo_total" class="form-label">Costo Total Margen Error</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="margen_error_costo_total" 
+                                       name="margen_error_costo_total" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Menu Price -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="precio_carta" class="form-label">Precio de Menú o Carta</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="precio_carta" 
-                               name="precio_carta">
-                    </div>
-                </div>
+        <!-- Costos de Preparación Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">Costos de Preparación</h5>
             </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="precio_real_venta" class="form-label">Precio Real de Venta (Sin IVA)</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="precio_real_venta" 
-                               name="precio_real_venta"  >
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="costo_total_preparacion" class="form-label">Costo Total Preparación</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="costo_total_preparacion" 
+                                       name="costo_total_preparacion" readonly>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Final Calculations -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="iva_por_porcion" class="form-label">IVA por Porción</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="iva_por_porcion" 
-                               name="iva_por_porcion"  >
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="porcentaje_real_costo" class="form-label">% Real de Costo MP</label>
-                    <div class="input-group">
-                        <input type="number" step="0.01" class="form-control" id="porcentaje_real_costo" 
-                               name="porcentaje_real_costo"  >
-                        <span class="input-group-text">%</span>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="costo_por_porcion" class="form-label">Costo por Porción</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="costo_por_porcion" 
+                                       name="costo_por_porcion" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Save Recipe Costs
+        <!-- Costos MP y Precio Potencial Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="card-title mb-0">Costos MP y Precio Potencial</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="porcentaje_costo_mp" class="form-label">% Costo MP</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="porcentaje_costo_mp" 
+                                       name="porcentaje_costo_mp" value="35">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="precio_potencial_venta" class="form-label">Precio Potencial Venta</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="precio_potencial_venta" 
+                                       name="precio_potencial_venta" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impuestos Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">Impuestos y IVA</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="impuesto_consumo_porcentaje" class="form-label">Impuesto Consumo (%)</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="impuesto_consumo_porcentaje" 
+                                       name="impuesto_consumo_porcentaje" value="13">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="impuesto_consumo_costo_total" class="form-label">Costo Total Impuesto</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="impuesto_consumo_costo_total" 
+                                       name="impuesto_consumo_costo_total" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="iva_por_porcion" class="form-label">IVA por Porción</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="iva_por_porcion" 
+                                       name="iva_por_porcion" readonly>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="iva_porcion_costo_total" class="form-label">Costo Total IVA</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="iva_porcion_costo_total" 
+                                       name="iva_porcion_costo_total" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Precios Finales Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">Precios Finales</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="precio_venta" class="form-label">Precio Venta Sugerido</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="precio_venta" 
+                                       name="precio_venta" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="precio_carta" class="form-label">Precio de Menú o Carta</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="precio_carta" 
+                                       name="precio_carta">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="precio_real_venta" class="form-label">Precio Real de Venta (Sin IVA)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="precio_real_venta" 
+                                       name="precio_real_venta" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="porcentaje_real_costo" class="form-label">% Real de Costo MP</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="porcentaje_real_costo" 
+                                       name="porcentaje_real_costo" readonly>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+            <i class="fas fa-save"></i> Guardar Costos de Receta
         </button>
     </form>
 </div>

@@ -35,37 +35,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             case 'costos_receta':
                 if (!empty($_POST['costo_receta_id'])) {
-                    $query = "INSERT INTO costos_receta (costo_receta_id, receta_id, receta_ingredientes_id, costo_total_materia_prima, 
-                             margen_error_porcentaje, costo_total_preparacion, costo_por_porcion, porcentaje_costo_mp, precio_potencial_venta,
-                             impuesto_consumo_porcentaje, precio_venta, precio_carta, precio_real_venta, iva_por_porcion, porcentaje_real_costo) 
-                             VALUES (:costo_receta_id, :receta_id, :receta_ingredientes_id, :costo_total_materia_prima, :margen_error_porcentaje,
-                             :costo_total_preparacion, :costo_por_porcion, :porcentaje_costo_mp, :precio_potencial_venta, :impuesto_consumo_porcentaje,
-                             :precio_venta, :precio_carta, :precio_real_venta, :iva_por_porcion, :porcentaje_real_costo)";
+                    $query = "INSERT INTO costos_receta (
+                                costo_receta_id, 
+                                receta_id, 
+                                receta_ingredientes_id, 
+                                costo_total_materia_prima, 
+                                margen_error_porcentaje,
+                                margen_error_costo_total,
+                                costo_total_preparacion, 
+                                costo_por_porcion, 
+                                porcentaje_costo_mp, 
+                                precio_potencial_venta,
+                                impuesto_consumo_porcentaje,
+                                impuesto_consumo_costo_total,
+                                precio_venta, 
+                                precio_carta, 
+                                precio_real_venta, 
+                                iva_por_porcion,
+                                iva_porcion_costo_total,
+                                porcentaje_real_costo
+                            ) VALUES (
+                                :costo_receta_id,
+                                :receta_id, 
+                                :receta_ingredientes_id, 
+                                :costo_total_materia_prima, 
+                                :margen_error_porcentaje,
+                                :margen_error_costo_total,
+                                :costo_total_preparacion, 
+                                :costo_por_porcion, 
+                                :porcentaje_costo_mp, 
+                                :precio_potencial_venta,
+                                :impuesto_consumo_porcentaje,
+                                :impuesto_consumo_costo_total,
+                                :precio_venta,
+                                :precio_carta, 
+                                :precio_real_venta, 
+                                :iva_por_porcion,
+                                :iva_porcion_costo_total,
+                                :porcentaje_real_costo
+                            )";
                     $stmt = $db->prepare($query);
                     $stmt->bindParam(':costo_receta_id', $_POST['costo_receta_id']);
                 } else {
-                    $query = "INSERT INTO costos_receta (receta_id, receta_ingredientes_id, costo_total_materia_prima, margen_error_porcentaje,
-                             costo_total_preparacion, costo_por_porcion, porcentaje_costo_mp, precio_potencial_venta, impuesto_consumo_porcentaje,
-                             precio_venta, precio_carta, precio_real_venta, iva_por_porcion, porcentaje_real_costo) 
-                             VALUES (:receta_id, :receta_ingredientes_id, :costo_total_materia_prima, :margen_error_porcentaje, :costo_total_preparacion,
-                             :costo_por_porcion, :porcentaje_costo_mp, :precio_potencial_venta, :impuesto_consumo_porcentaje, :precio_venta,
-                             :precio_carta, :precio_real_venta, :iva_por_porcion, :porcentaje_real_costo)";
+                    $query = "INSERT INTO costos_receta (
+                                receta_id, 
+                                receta_ingredientes_id, 
+                                costo_total_materia_prima, 
+                                margen_error_porcentaje,
+                                margen_error_costo_total,
+                                costo_total_preparacion, 
+                                costo_por_porcion, 
+                                porcentaje_costo_mp, 
+                                precio_potencial_venta,
+                                impuesto_consumo_porcentaje,
+                                impuesto_consumo_costo_total,
+                                precio_venta, 
+                                precio_carta, 
+                                precio_real_venta, 
+                                iva_por_porcion,
+                                iva_porcion_costo_total,
+                                porcentaje_real_costo
+                            ) VALUES (
+                                :receta_id, 
+                                :receta_ingredientes_id, 
+                                :costo_total_materia_prima, 
+                                :margen_error_porcentaje,
+                                :margen_error_costo_total,
+                                :costo_total_preparacion, 
+                                :costo_por_porcion, 
+                                :porcentaje_costo_mp, 
+                                :precio_potencial_venta,
+                                :impuesto_consumo_porcentaje,
+                                :impuesto_consumo_costo_total,
+                                :precio_venta,
+                                :precio_carta, 
+                                :precio_real_venta, 
+                                :iva_por_porcion,
+                                :iva_porcion_costo_total,
+                                :porcentaje_real_costo
+                            )";
                     $stmt = $db->prepare($query);
                 }
+                
+                // Bind all parameters
                 $stmt->bindParam(':receta_id', $_POST['receta_id']);
                 $stmt->bindParam(':receta_ingredientes_id', $_POST['receta_ingredientes_id']);
                 $stmt->bindParam(':costo_total_materia_prima', $_POST['costo_total_materia_prima']);
                 $stmt->bindParam(':margen_error_porcentaje', $_POST['margen_error_porcentaje']);
+                $stmt->bindParam(':margen_error_costo_total', $_POST['margen_error_costo_total']);
                 $stmt->bindParam(':costo_total_preparacion', $_POST['costo_total_preparacion']);
                 $stmt->bindParam(':costo_por_porcion', $_POST['costo_por_porcion']);
                 $stmt->bindParam(':porcentaje_costo_mp', $_POST['porcentaje_costo_mp']);
                 $stmt->bindParam(':precio_potencial_venta', $_POST['precio_potencial_venta']);
                 $stmt->bindParam(':impuesto_consumo_porcentaje', $_POST['impuesto_consumo_porcentaje']);
+                $stmt->bindParam(':impuesto_consumo_costo_total', $_POST['impuesto_consumo_costo_total']);
                 $stmt->bindParam(':precio_venta', $_POST['precio_venta']);
                 $stmt->bindParam(':precio_carta', $_POST['precio_carta']);
                 $stmt->bindParam(':precio_real_venta', $_POST['precio_real_venta']);
                 $stmt->bindParam(':iva_por_porcion', $_POST['iva_por_porcion']);
+                $stmt->bindParam(':iva_porcion_costo_total', $_POST['iva_porcion_costo_total']);
                 $stmt->bindParam(':porcentaje_real_costo', $_POST['porcentaje_real_costo']);
+                
                 $stmt->execute();
                 sendResponse(true, 'Recipe costs added successfully!');
                 break;
