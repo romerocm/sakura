@@ -62,7 +62,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="costo_total_materia_prima" 
-                                       name="costo_total_materia_prima" readonly>
+                                       name="costo_total_materia_prima">
                             </div>
                         </div>
                     </div>
@@ -93,7 +93,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="margen_error_costo_total" 
-                                       name="margen_error_costo_total" readonly>
+                                       name="margen_error_costo_total" >
                             </div>
                         </div>
                     </div>
@@ -114,7 +114,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="costo_total_preparacion" 
-                                       name="costo_total_preparacion" readonly>
+                                       name="costo_total_preparacion" >
                             </div>
                         </div>
                     </div>
@@ -124,7 +124,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="costo_por_porcion" 
-                                       name="costo_por_porcion" readonly>
+                                       name="costo_por_porcion" >
                             </div>
                         </div>
                     </div>
@@ -155,7 +155,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="precio_potencial_venta" 
-                                       name="precio_potencial_venta" readonly>
+                                       name="precio_potencial_venta" >
                             </div>
                         </div>
                     </div>
@@ -186,7 +186,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="impuesto_consumo_costo_total" 
-                                       name="impuesto_consumo_costo_total" readonly>
+                                       name="impuesto_consumo_costo_total" >
                             </div>
                         </div>
                     </div>
@@ -198,7 +198,7 @@
                             <label for="iva_por_porcion" class="form-label">IVA por Porción</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="iva_por_porcion" 
-                                       name="iva_por_porcion" readonly>
+                                       name="iva_por_porcion" >
                                 <span class="input-group-text">%</span>
                             </div>
                         </div>
@@ -209,7 +209,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="iva_porcion_costo_total" 
-                                       name="iva_porcion_costo_total" readonly>
+                                       name="iva_porcion_costo_total" >
                             </div>
                         </div>
                     </div>
@@ -230,7 +230,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="precio_venta" 
-                                       name="precio_venta" readonly>
+                                       name="precio_venta" >
                             </div>
                         </div>
                     </div>
@@ -253,7 +253,7 @@
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" class="form-control" id="precio_real_venta" 
-                                       name="precio_real_venta" readonly>
+                                       name="precio_real_venta" >
                             </div>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
                             <label for="porcentaje_real_costo" class="form-label">% Real de Costo MP</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="porcentaje_real_costo" 
-                                       name="porcentaje_real_costo" readonly>
+                                       name="porcentaje_real_costo" >
                                 <span class="input-group-text">%</span>
                             </div>
                         </div>
