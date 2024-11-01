@@ -198,7 +198,7 @@
                             <label for="iva_por_porcion" class="form-label">IVA por Porción</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="iva_por_porcion" 
-                                       name="iva_por_porcion" >
+                                       name="iva_por_porcion" value="13">
                                 <span class="input-group-text">%</span>
                             </div>
                         </div>
