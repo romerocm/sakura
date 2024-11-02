@@ -76,7 +76,7 @@
                     <label for="costo_total" class="form-label">Costo Total</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" id="costo_total" 
+                        <input type="number" step="0.00001" class="form-control" id="costo_total" 
                                name="costo_total" required>
                     </div>
                 </div>
