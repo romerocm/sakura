@@ -1,30 +1,27 @@
 // Sales Entry Form Handler
 const SalesEntry = {
-  // Initialize the form and attach event handlers
   init: function () {
-    this.loadSelectOptions();
     this.initializeDateField();
     this.attachEventHandlers();
-    this.loadDayData();
+    this.loadSelectOptions();
   },
 
-  // Load categories and recipes into select elements
   loadSelectOptions: function () {
+    // Load categories
     $.get("includes/get_categories.php", function (data) {
       $(".category-select").html(data);
     });
 
+    // Load recipes
     $.get("includes/get_recipes.php", function (data) {
       $(".recipe-select").html(data);
     });
   },
 
-  // Set initial date to today
   initializeDateField: function () {
     $("#sale_date").val(new Date().toISOString().split("T")[0]);
   },
 
-  // Update all totals for categories and products
   updateTotals: function () {
     // Category totals
     let categoryPercentageTotal = 0;
@@ -63,77 +60,6 @@ const SalesEntry = {
     $("#productTotalAmount").text(productAmountTotal.toFixed(2));
   },
 
-  // Fill form with provided data
-  fillFormWithData: function (data) {
-    if (data.summary) {
-      $("#total_sales").val(data.summary.total_sales);
-      $("#net_sales").val(data.summary.net_sales);
-      $("#tips").val(data.summary.tips);
-      $("#customer_count").val(data.summary.customer_count);
-      $("#orders_count").val(data.summary.orders_count);
-
-      const avgOrder = data.summary.total_sales / data.summary.orders_count;
-      $("#average_order").val(avgOrder.toFixed(2));
-    }
-
-    // Fill categories
-    if (data.categories && data.categories.length > 0) {
-      const firstCategoryRow = $(".category-row").first();
-      $("#categoriesTable tbody").empty().append(firstCategoryRow);
-
-      data.categories.forEach((category, index) => {
-        const row = index === 0 ? firstCategoryRow : firstCategoryRow.clone();
-        row.find(".category-select").val(category.categoria_id);
-        row.find(".category-percentage").val(category.percentage);
-        row.find(".category-quantity").val(category.quantity);
-        row.find(".category-total").val(category.total);
-
-        if (index > 0) {
-          $("#categoriesTable tbody").append(row);
-        }
-      });
-    }
-
-    // Fill products
-    if (data.products && data.products.length > 0) {
-      const firstProductRow = $(".product-row").first();
-      $("#productsTable tbody").empty().append(firstProductRow);
-
-      data.products.forEach((product, index) => {
-        const row = index === 0 ? firstProductRow : firstProductRow.clone();
-        row.find(".recipe-select").val(product.receta_id);
-        row.find(".product-percentage").val(product.percentage);
-        row.find(".product-quantity").val(product.quantity);
-        row.find(".product-total").val(product.total);
-
-        if (index > 0) {
-          $("#productsTable tbody").append(row);
-        }
-      });
-    }
-
-    this.updateTotals();
-  },
-
-  // Load data for a specific day
-  loadDayData: function () {
-    const currentDate = $("#sale_date").val();
-    $.get("includes/get_daily_summary.php", { date: currentDate }, (data) => {
-      if (data.summary) {
-        this.fillFormWithData(data);
-      } else {
-        $("#dailySalesForm")[0].reset();
-        $("#sale_date").val(currentDate);
-
-        $(".category-row:not(:first)").remove();
-        $(".product-row:not(:first)").remove();
-
-        this.updateTotals();
-      }
-    });
-  },
-
-  // Handle form submission
   handleSubmit: function (e) {
     e.preventDefault();
 
@@ -184,7 +110,8 @@ const SalesEntry = {
       success: function (response) {
         if (response.success) {
           showToast("Sales data saved successfully!", "success");
-          $("#nextDay").click();
+          $("#dailySalesForm")[0].reset();
+          SalesEntry.initializeDateField();
         } else {
           showToast(response.message || "Error saving sales data", "danger");
         }
@@ -195,80 +122,50 @@ const SalesEntry = {
     });
   },
 
-  // Attach all event handlers
   attachEventHandlers: function () {
-    // Navigation buttons
-    $("#prevDay").click(() => {
-      const currentDate = new Date($("#sale_date").val());
-      currentDate.setDate(currentDate.getDate() - 1);
-      $("#sale_date").val(currentDate.toISOString().split("T")[0]);
-      this.loadDayData();
+    const self = this;
+
+    // Add new category row
+    $("#addCategory").on("click", function () {
+      const template = $(".category-row").first().clone();
+      template.find("input").val("");
+      template.find("select").val("");
+      $("#categoriesTable tbody").append(template);
+      self.loadSelectOptions();
     });
 
-    $("#nextDay").click(() => {
-      const currentDate = new Date($("#sale_date").val());
-      currentDate.setDate(currentDate.getDate() + 1);
-      $("#sale_date").val(currentDate.toISOString().split("T")[0]);
-      this.loadDayData();
-    });
-
-    // Add new rows
-    $("#addCategory").click(() => {
-      const newRow = $(".category-row").first().clone();
-      newRow.find("input").val("");
-      newRow.find("select").val("");
-      $("#categoriesTable tbody").append(newRow);
-      this.updateTotals();
-    });
-
-    $("#addProduct").click(() => {
-      const newRow = $(".product-row").first().clone();
-      newRow.find("input").val("");
-      newRow.find("select").val("");
-      $("#productsTable tbody").append(newRow);
-      this.updateTotals();
+    // Add new product row
+    $("#addProduct").on("click", function () {
+      const template = $(".product-row").first().clone();
+      template.find("input").val("");
+      template.find("select").val("");
+      $("#productsTable tbody").append(template);
+      self.loadSelectOptions();
     });
 
     // Remove rows
-    $(document).on("click", ".remove-row", (e) => {
-      const tbody = $(e.target).closest("tbody");
+    $(document).on("click", ".remove-row", function () {
+      const tbody = $(this).closest("tbody");
       if (tbody.find("tr").length > 1) {
-        $(e.target).closest("tr").remove();
-        this.updateTotals();
+        $(this).closest("tr").remove();
+        self.updateTotals();
       }
     });
 
     // Update totals on input
-    $(document).on("input", "input", () => this.updateTotals());
+    $(document).on("input", "input", function () {
+      self.updateTotals();
+    });
 
     // Calculate average order
-    $("#total_sales, #orders_count").on("input", () => {
+    $("#total_sales, #orders_count").on("input", function () {
       const total = parseFloat($("#total_sales").val()) || 0;
       const orders = parseInt($("#orders_count").val()) || 1;
       $("#average_order").val((total / orders).toFixed(2));
     });
 
-    // Copy previous day data
-    $("#copyPrevious").click(() => {
-      const currentDate = new Date($("#sale_date").val());
-      const previousDate = new Date(currentDate);
-      previousDate.setDate(previousDate.getDate() - 1);
-
-      $.get(
-        "includes/get_daily_summary.php",
-        {
-          date: previousDate.toISOString().split("T")[0],
-        },
-        (data) => {
-          if (data.summary) {
-            this.fillFormWithData(data);
-          }
-        }
-      );
-    });
-
     // Verify totals
-    $("#verifyTotals").click(() => {
+    $("#verifyTotals").on("click", function () {
       const totalSales = parseFloat($("#total_sales").val()) || 0;
       const categoryTotal = parseFloat($("#categoryTotalAmount").text()) || 0;
       const productTotal = parseFloat($("#productTotalAmount").text()) || 0;
@@ -284,9 +181,13 @@ const SalesEntry = {
     });
 
     // Form submission
-    $("#dailySalesForm").submit((e) => this.handleSubmit(e));
+    $("#dailySalesForm").on("submit", function (e) {
+      self.handleSubmit(e);
+    });
   },
 };
 
 // Initialize when document is ready
-$(document).ready(() => SalesEntry.init());
+$(document).ready(function () {
+  SalesEntry.init();
+});
