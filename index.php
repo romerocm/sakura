@@ -202,6 +202,7 @@
     <script src="js/toast.js"></script>
     <script src="js/dependencies.js"></script>
     <script src="js/recipe-costs.js"></script>
+    <script src="js/sales-entry.js"></script>
 
 </body>
 </html>
