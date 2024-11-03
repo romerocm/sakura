@@ -74,23 +74,6 @@
             color: #0d6efd;
             font-weight: 500;
         }
-        .row-number {
-            display: inline-block;
-            min-width: 24px;
-            text-align: center;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        .category-entry, .product-entry {
-            position: relative;
-            padding-top: 8px;
-        }
-
-        .col-md-3:first-child {
-            display: flex;
-            align-items: center;
-        }
     </style>
 </head>
 <body>

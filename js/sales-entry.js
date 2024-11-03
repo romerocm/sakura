@@ -33,12 +33,12 @@ $(document).ready(function () {
   // Update row numbers
   function updateRowNumbers() {
     // Update category row numbers
-    $("#categoryEntries .category-entry").each(function (index) {
+    $("#categoriesTable tbody tr.category-row").each(function (index) {
       const rowNum = index + 1;
       let rowLabel = $(this).find(".row-number");
       if (rowLabel.length === 0) {
         $(this)
-          .find(".col-md-3:first")
+          .find("td:first")
           .prepend(
             '<span class="row-number badge bg-secondary me-2">' +
               rowNum +
@@ -50,12 +50,12 @@ $(document).ready(function () {
     });
 
     // Update product row numbers
-    $("#productEntries .product-entry").each(function (index) {
+    $("#productsTable tbody tr.product-row").each(function (index) {
       const rowNum = index + 1;
       let rowLabel = $(this).find(".row-number");
       if (rowLabel.length === 0) {
         $(this)
-          .find(".col-md-3:first")
+          .find("td:first")
           .prepend(
             '<span class="row-number badge bg-secondary me-2">' +
               rowNum +
@@ -68,34 +68,30 @@ $(document).ready(function () {
   }
 
   // Add new category row
-  $("#addCategoryButton").on("click", function () {
-    const template = $("#categoryEntries .category-entry:first").clone(true);
+  $("#addCategory").on("click", function () {
+    const template = $("#categoriesTable tbody tr.category-row:first").clone(
+      true
+    );
     template.find("input").val(""); // Clear input values
-    template.find("select").each(function () {
-      $(this).val(""); // Clear select values
-    });
-    $("#categoryEntries").append(template);
+    template.find("select").val(""); // Clear select values
+    $("#categoriesTable tbody").append(template);
     updateRowNumbers();
   });
 
   // Add new product row
-  $("#addProductButton").on("click", function () {
-    const template = $("#productEntries .product-entry:first").clone(true);
+  $("#addProduct").on("click", function () {
+    const template = $("#productsTable tbody tr.product-row:first").clone(true);
     template.find("input").val(""); // Clear input values
-    template.find("select").each(function () {
-      $(this).val(""); // Clear select values
-    });
-    $("#productEntries").append(template);
+    template.find("select").val(""); // Clear select values
+    $("#productsTable tbody").append(template);
     updateRowNumbers();
   });
 
   // Remove row handler
-  $(".remove-category, .remove-product").on("click", function () {
-    const parentContainer = $(this)
-      .closest(".category-entry, .product-entry")
-      .parent();
-    if (parentContainer.children().length > 1) {
-      $(this).closest(".category-entry, .product-entry").remove();
+  $(document).on("click", ".remove-row", function () {
+    const tbody = $(this).closest("tbody");
+    if (tbody.find("tr").length > 1) {
+      $(this).closest("tr").remove();
       updateRowNumbers();
       updateTotals();
     }
@@ -108,7 +104,7 @@ $(document).ready(function () {
     let categoryQuantityTotal = 0;
     let categoryAmountTotal = 0;
 
-    $("#categoryEntries .category-entry").each(function () {
+    $("#categoriesTable tbody tr.category-row").each(function () {
       categoryPercentageTotal +=
         parseFloat($(this).find(".category-percentage").val()) || 0;
       categoryQuantityTotal +=
@@ -126,7 +122,7 @@ $(document).ready(function () {
     let productQuantityTotal = 0;
     let productAmountTotal = 0;
 
-    $("#productEntries .product-entry").each(function () {
+    $("#productsTable tbody tr.product-row").each(function () {
       productPercentageTotal +=
         parseFloat($(this).find(".product-percentage").val()) || 0;
       productQuantityTotal +=
@@ -139,6 +135,82 @@ $(document).ready(function () {
     $("#productQuantityTotal").text(productQuantityTotal);
     $("#productTotalAmount").text(productAmountTotal.toFixed(2));
   }
+
+  // Calculate average order
+  function updateAverageOrder() {
+    const totalSales = parseFloat($("#total_sales").val()) || 0;
+    const ordersCount = parseInt($("#orders_count").val()) || 1;
+    const averageOrder = totalSales / ordersCount;
+    $("#average_order").val(averageOrder.toFixed(2));
+  }
+
+  // Verify totals
+  $("#verifyTotals").on("click", function () {
+    const totalSales = parseFloat($("#total_sales").val()) || 0;
+    const categoryTotal = parseFloat($("#categoryTotalAmount").text()) || 0;
+    const productTotal = parseFloat($("#productTotalAmount").text()) || 0;
+
+    if (
+      Math.abs(totalSales - categoryTotal) > 0.01 ||
+      Math.abs(totalSales - productTotal) > 0.01
+    ) {
+      showToast("Warning: Totals do not match!", "warning");
+    } else {
+      showToast("Totals verified successfully!", "success");
+    }
+  });
+
+  // Previous/Next Day Navigation
+  $("#prevDay").on("click", function () {
+    const currentDate = new Date($("#sale_date").val());
+    currentDate.setDate(currentDate.getDate() - 1);
+    $("#sale_date").val(currentDate.toISOString().split("T")[0]);
+  });
+
+  $("#nextDay").on("click", function () {
+    const currentDate = new Date($("#sale_date").val());
+    currentDate.setDate(currentDate.getDate() + 1);
+    $("#sale_date").val(currentDate.toISOString().split("T")[0]);
+  });
+
+  // Auto-calculate percentages
+  $(document).on("input", ".category-total, #total_sales", function () {
+    const totalSales = parseFloat($("#total_sales").val()) || 0;
+
+    $(".category-total").each(function () {
+      const total = parseFloat($(this).val()) || 0;
+      const percentage = totalSales > 0 ? (total / totalSales) * 100 : 0;
+      $(this)
+        .closest("tr")
+        .find(".category-percentage")
+        .val(percentage.toFixed(1));
+    });
+
+    updateTotals();
+  });
+
+  $(document).on("input", ".product-total, #total_sales", function () {
+    const totalSales = parseFloat($("#total_sales").val()) || 0;
+
+    $(".product-total").each(function () {
+      const total = parseFloat($(this).val()) || 0;
+      const percentage = totalSales > 0 ? (total / totalSales) * 100 : 0;
+      $(this)
+        .closest("tr")
+        .find(".product-percentage")
+        .val(percentage.toFixed(1));
+    });
+
+    updateTotals();
+  });
+
+  // Update calculations when relevant inputs change
+  $("#total_sales, #orders_count").on("input", updateAverageOrder);
+  $(document).on(
+    "input",
+    ".category-total, .product-total, #total_sales",
+    updateTotals
+  );
 
   // Handle form submission
   $("#dailySalesForm").on("submit", function (e) {
@@ -156,7 +228,7 @@ $(document).ready(function () {
     };
 
     // Collect categories data
-    $("#categoryEntries .category-entry").each(function () {
+    $("#categoriesTable tbody tr.category-row").each(function () {
       const categoryId = $(this).find(".category-select").val();
       if (categoryId) {
         formData.categories.push({
@@ -170,12 +242,11 @@ $(document).ready(function () {
     });
 
     // Collect products data
-    $("#productEntries .product-entry").each(function () {
+    $("#productsTable tbody tr.product-row").each(function () {
       const recipeId = $(this).find(".recipe-select").val();
       if (recipeId) {
         formData.products.push({
           recipe_id: recipeId,
-          costo_receta_id: $(this).find(".costo-receta-select").val(),
           percentage:
             parseFloat($(this).find(".product-percentage").val()) || 0,
           quantity: parseInt($(this).find(".product-quantity").val()) || 0,
@@ -207,13 +278,4 @@ $(document).ready(function () {
 
   // Initialize form on page load
   initializeForm();
-
-  // Update calculations when inputs change
-  $(document).on(
-    "input",
-    ".category-total, .product-total, #total_sales",
-    function () {
-      updateTotals();
-    }
-  );
 });
