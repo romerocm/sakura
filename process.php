@@ -90,8 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                // Insert product summaries
+                // Insert product summaries and fact_sales
                 if (!empty($jsonData['products'])) {
+                    // Prepare statements for both tables
                     $productQuery = "INSERT INTO product_sales_summary (
                                     summary_id, 
                                     receta_id, 
@@ -109,7 +110,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 )";
                     $productStmt = $db->prepare($productQuery);
 
+                    $salesQuery = "INSERT INTO fact_sales (
+                                    sale_date,
+                                    receta_id,
+                                    costo_receta_id,
+                                    order_type_id,
+                                    quantity,
+                                    total_amount,
+                                    discount_amount,
+                                    tip_amount,
+                                    summary_id
+                                ) VALUES (
+                                    :sale_date,
+                                    :receta_id,
+                                    :costo_receta_id,
+                                    :order_type_id,
+                                    :quantity,
+                                    :total_amount,
+                                    :discount_amount,
+                                    :tip_amount,
+                                    :summary_id
+                                )";
+                    $salesStmt = $db->prepare($salesQuery);
+
                     foreach ($jsonData['products'] as $product) {
+                        // Insert into product_sales_summary
                         $productStmt->bindParam(':summary_id', $summary_id);
                         $productStmt->bindParam(':receta_id', $product['recipe_id']);
                         $productStmt->bindParam(':costo_receta_id', $product['costo_receta_id']);
@@ -117,6 +142,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $productStmt->bindParam(':quantity', $product['quantity']);
                         $productStmt->bindParam(':total', $product['total']);
                         $productStmt->execute();
+
+                        // Insert into fact_sales
+                        $salesStmt->bindParam(':sale_date', $jsonData['sale_date']);
+                        $salesStmt->bindParam(':receta_id', $product['recipe_id']);
+                        $salesStmt->bindParam(':costo_receta_id', $product['costo_receta_id']);
+                        $salesStmt->bindValue(':order_type_id', 1); // Default order type
+                        $salesStmt->bindParam(':quantity', $product['quantity']);
+                        $salesStmt->bindParam(':total_amount', $product['total']);
+                        $salesStmt->bindValue(':discount_amount', 0);
+                        $salesStmt->bindValue(':tip_amount', 0);
+                        $salesStmt->bindParam(':summary_id', $summary_id);
+                        $salesStmt->execute();
                     }
                 }
 
