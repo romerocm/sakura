@@ -66,6 +66,7 @@ $(document).ready(function () {
     });
   }
 
+  // Update totals
   function updateTotals() {
     const totalSales = parseFloat($("#total_sales").val()) || 0;
 
@@ -97,7 +98,7 @@ $(document).ready(function () {
     $("#categoryQuantityTotal").text(categoryQuantityTotal);
     $("#categoryTotalAmount").text(categoryAmountTotal.toFixed(2));
 
-    // Similar update for products
+    // Product totals
     let productQuantityTotal = 0;
     let productAmountTotal = 0;
 
@@ -135,7 +136,6 @@ $(document).ready(function () {
     const categoryTotal = parseFloat($("#categoryTotalAmount").text()) || 0;
     const productTotal = parseFloat($("#productTotalAmount").text()) || 0;
 
-    // Only provide feedback if there's a total sales amount
     if (totalSales > 0) {
       const categoryRow = $("#categoriesTable tfoot tr");
       const productRow = $("#productsTable tfoot tr");
@@ -154,15 +154,7 @@ $(document).ready(function () {
     }
   }
 
-  // Calculate average order
-  function updateAverageOrder() {
-    const totalSales = parseFloat($("#total_sales").val()) || 0;
-    const ordersCount = parseInt($("#orders_count").val()) || 1;
-    const averageOrder = totalSales / ordersCount;
-    $("#average_order").val(averageOrder.toFixed(2));
-  }
-
-  // Event Handlers
+  // Add new category row
   $("#addCategory").on("click", function () {
     const template = $("#categoriesTable tbody tr.category-row:first").clone(
       true
@@ -173,6 +165,7 @@ $(document).ready(function () {
     updateRowNumbers();
   });
 
+  // Add new product row
   $("#addProduct").on("click", function () {
     const template = $("#productsTable tbody tr.product-row:first").clone(true);
     template.find("input").val("");
@@ -181,6 +174,7 @@ $(document).ready(function () {
     updateRowNumbers();
   });
 
+  // Remove row handler
   $(document).on("click", ".remove-row", function () {
     const tbody = $(this).closest("tbody");
     if (tbody.find("tr").length > 1) {
@@ -189,6 +183,14 @@ $(document).ready(function () {
       updateTotals();
     }
   });
+
+  // Calculate average order
+  function updateAverageOrder() {
+    const totalSales = parseFloat($("#total_sales").val()) || 0;
+    const ordersCount = parseInt($("#orders_count").val()) || 1;
+    const averageOrder = totalSales / ordersCount;
+    $("#average_order").val(averageOrder.toFixed(2));
+  }
 
   // Previous/Next Day Navigation
   $("#prevDay").on("click", function () {
@@ -203,76 +205,109 @@ $(document).ready(function () {
     $("#sale_date").val(currentDate.toISOString().split("T")[0]);
   });
 
-  // Input event handlers
+  // Auto-calculate percentages
+  $(document).on("input", ".category-total, #total_sales", function () {
+    updateTotals();
+  });
+
+  $(document).on("input", ".product-total, #total_sales", function () {
+    updateTotals();
+  });
+
+  // Update calculations when inputs change
   $("#total_sales, #orders_count").on("input", updateAverageOrder);
   $(document).on(
     "input",
-    "#total_sales, .category-total, .category-quantity, .product-total, .product-quantity",
+    ".category-total, .category-quantity, .product-total, .product-quantity",
     updateTotals
   );
 
-  // Form submission
-  $("#dailySalesForm").on("submit", function (e) {
+  // Form submission handler
+  $("#dailySalesForm").on("submit", async function (e) {
     e.preventDefault();
 
-    const formData = {
-      form_type: "daily_sales_summary",
-      sale_date: $("#sale_date").val(),
-      total_sales: parseFloat($("#total_sales").val()) || 0,
-      net_sales: parseFloat($("#net_sales").val()) || 0,
-      tips: parseFloat($("#tips").val()) || 0,
-      customer_count: parseInt($("#customer_count").val()) || 0,
-      categories: [],
-      products: [],
-    };
+    try {
+      // Get all recipe costs first
+      const recipeCosts = {};
+      const recipePromises = [];
 
-    // Collect categories data
-    $("#categoriesTable tbody tr.category-row").each(function () {
-      const categoryId = $(this).find(".category-select").val();
-      if (categoryId) {
-        formData.categories.push({
-          category_id: categoryId,
-          percentage:
-            parseFloat($(this).find(".category-percentage").val()) || 0,
-          quantity: parseInt($(this).find(".category-quantity").val()) || 0,
-          total: parseFloat($(this).find(".category-total").val()) || 0,
-        });
-      }
-    });
-
-    // Collect products data
-    $("#productsTable tbody tr.product-row").each(function () {
-      const recipeId = $(this).find(".recipe-select").val();
-      if (recipeId) {
-        formData.products.push({
-          recipe_id: recipeId,
-          percentage:
-            parseFloat($(this).find(".product-percentage").val()) || 0,
-          quantity: parseInt($(this).find(".product-quantity").val()) || 0,
-          total: parseFloat($(this).find(".product-total").val()) || 0,
-        });
-      }
-    });
-
-    // Submit form data
-    $.ajax({
-      url: "process.php",
-      type: "POST",
-      data: JSON.stringify(formData),
-      contentType: "application/json",
-      success: function (response) {
-        if (response.success) {
-          showToast("Daily sales summary saved successfully!", "success");
-          $("#dailySalesForm")[0].reset();
-          initializeForm();
-        } else {
-          showToast(response.message || "Error saving sales summary", "danger");
+      $("#productsTable tbody tr.product-row").each(function () {
+        const recipeId = $(this).find(".recipe-select").val();
+        if (recipeId) {
+          const promise = $.get("includes/get_recipe_cost_id.php", {
+            recipe_id: recipeId,
+          }).then((response) => {
+            recipeCosts[recipeId] = response.costo_receta_id;
+          });
+          recipePromises.push(promise);
         }
-      },
-      error: function () {
-        showToast("Error saving sales summary", "danger");
-      },
-    });
+      });
+
+      // Wait for all recipe costs to be fetched
+      await Promise.all(recipePromises);
+
+      const formData = {
+        form_type: "daily_sales_summary",
+        sale_date: $("#sale_date").val(),
+        total_sales: parseFloat($("#total_sales").val()) || 0,
+        net_sales: parseFloat($("#net_sales").val()) || 0,
+        tips: parseFloat($("#tips").val()) || 0,
+        customer_count: parseInt($("#customer_count").val()) || 0,
+        categories: [],
+        products: [],
+      };
+
+      // Collect categories data
+      $("#categoriesTable tbody tr.category-row").each(function () {
+        const categoryId = $(this).find(".category-select").val();
+        if (categoryId) {
+          formData.categories.push({
+            category_id: categoryId,
+            percentage:
+              parseFloat($(this).find(".category-percentage").val()) || 0,
+            quantity: parseInt($(this).find(".category-quantity").val()) || 0,
+            total: parseFloat($(this).find(".category-total").val()) || 0,
+          });
+        }
+      });
+
+      // Collect products data
+      $("#productsTable tbody tr.product-row").each(function () {
+        const recipeId = $(this).find(".recipe-select").val();
+        if (recipeId && recipeCosts[recipeId]) {
+          formData.products.push({
+            recipe_id: recipeId,
+            costo_receta_id: recipeCosts[recipeId],
+            percentage:
+              parseFloat($(this).find(".product-percentage").val()) || 0,
+            quantity: parseInt($(this).find(".product-quantity").val()) || 0,
+            total: parseFloat($(this).find(".product-total").val()) || 0,
+          });
+        }
+      });
+
+      // Submit the form data
+      const response = await $.ajax({
+        url: "process.php",
+        type: "POST",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+      });
+
+      if (response.success) {
+        showToast("Daily sales summary saved successfully!", "success");
+        $("#dailySalesForm")[0].reset();
+        initializeForm();
+      } else {
+        showToast(response.message || "Error saving sales summary", "danger");
+      }
+    } catch (error) {
+      showToast(
+        "Error processing form: " + (error.message || "Unknown error"),
+        "danger"
+      );
+      console.error("Form submission error:", error);
+    }
   });
 
   // Initialize form on page load
