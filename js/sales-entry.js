@@ -66,46 +66,59 @@ $(document).ready(function () {
     });
   }
 
-  // Update totals and percentages
   function updateTotals() {
     const totalSales = parseFloat($("#total_sales").val()) || 0;
 
     // Category totals
-    let categoryPercentageTotal = 0;
     let categoryQuantityTotal = 0;
     let categoryAmountTotal = 0;
 
+    // First calculate the total amount
     $("#categoriesTable tbody tr.category-row").each(function () {
       const total = parseFloat($(this).find(".category-total").val()) || 0;
       const quantity = parseInt($(this).find(".category-quantity").val()) || 0;
-      const percentage = totalSales > 0 ? (total / totalSales) * 100 : 0;
 
-      $(this).find(".category-percentage").val(percentage.toFixed(1));
-
-      categoryPercentageTotal += percentage;
       categoryQuantityTotal += quantity;
       categoryAmountTotal += total;
+    });
+
+    // Then calculate percentages based on categoryAmountTotal
+    let categoryPercentageTotal = 0;
+    $("#categoriesTable tbody tr.category-row").each(function () {
+      const total = parseFloat($(this).find(".category-total").val()) || 0;
+      const percentage =
+        categoryAmountTotal > 0 ? (total / categoryAmountTotal) * 100 : 0;
+
+      $(this).find(".category-percentage").val(percentage.toFixed(1));
+      categoryPercentageTotal += percentage;
     });
 
     $("#categoryPercentageTotal").text(categoryPercentageTotal.toFixed(1));
     $("#categoryQuantityTotal").text(categoryQuantityTotal);
     $("#categoryTotalAmount").text(categoryAmountTotal.toFixed(2));
 
-    // Product totals
-    let productPercentageTotal = 0;
+    // Similar update for products
     let productQuantityTotal = 0;
     let productAmountTotal = 0;
 
+    // First calculate the total amount
     $("#productsTable tbody tr.product-row").each(function () {
       const total = parseFloat($(this).find(".product-total").val()) || 0;
       const quantity = parseInt($(this).find(".product-quantity").val()) || 0;
-      const percentage = totalSales > 0 ? (total / totalSales) * 100 : 0;
 
-      $(this).find(".product-percentage").val(percentage.toFixed(1));
-
-      productPercentageTotal += percentage;
       productQuantityTotal += quantity;
       productAmountTotal += total;
+    });
+
+    // Then calculate percentages based on productAmountTotal
+    let productPercentageTotal = 0;
+    $("#productsTable tbody tr.product-row").each(function () {
+      const total = parseFloat($(this).find(".product-total").val()) || 0;
+      const percentage =
+        productAmountTotal > 0 ? (total / productAmountTotal) * 100 : 0;
+
+      $(this).find(".product-percentage").val(percentage.toFixed(1));
+      productPercentageTotal += percentage;
     });
 
     $("#productPercentageTotal").text(productPercentageTotal.toFixed(1));
