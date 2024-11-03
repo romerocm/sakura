@@ -1,0 +1,43 @@
+/* Sales form specific styles */
+.row-number {
+  margin-right: 8px;
+  font-size: 0.85em;
+}
+
+#categoriesTable td:first-child,
+#productsTable td:first-child {
+  display: flex;
+  align-items: center;
+}
+
+#categoriesTable .form-select,
+#productsTable .form-select {
+  flex: 1;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.5rem;
+}
+
+/* Sales tables styling */
+#categoriesTable,
+#productsTable {
+  margin-bottom: 0;
+}
+
+/* Input group improvements */
+.input-group-sm {
+  width: 100%;
+}
+
+/* Table responsive improvements */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Badge improvements */
+.badge.bg-secondary {
+  font-weight: normal;
+  font-size: 0.85em;
+}

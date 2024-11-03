@@ -8,73 +8,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <style>
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-        .manual-id-toggle {
-            margin-bottom: 15px;
-        }
-        .id-input {
-            display: none;
-        }
-        .nav-pills .nav-link {
-            margin-right: 5px;
-            color: #6c757d;
-        }
-        .nav-pills .nav-link.active {
-            background-color: #0d6efd;
-            color: white;
-        }
-        .nav-pills .nav-link i {
-            margin-right: 5px;
-        }
-        .section-title {
-            margin: 15px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
-        }
-        .tab-pane {
-            padding: 20px 0;
-        }
-        .nested-tab {
-            margin-top: 15px;
-        }
-        .status-item {
-            margin: 5px 0;
-            padding: 5px 0;
-            transition: color 0.3s ease;
-        }
-        .status-item.checking {
-            color: #666;
-        }
-        .status-item.available {
-            color: #28a745;
-        }
-        .status-item.unavailable {
-            color: #dc3545;
-        }
-        .dependency-status .card {
-            margin-bottom: 20px;
-            border-left: 4px solid #0d6efd;
-        }
-        .dependency-status .card-body {
-            padding: 15px;
-        }
-        .alert-info {
-            border-left: 4px solid #0dcaf0;
-        }
-        .nav-tabs .nav-link {
-            color: #6c757d;
-        }
-        .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            font-weight: 500;
-        }
-    </style>
+    <!-- Custom Styles -->
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/forms.css" rel="stylesheet">
+    <link href="css/sales.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-4">
