@@ -52,6 +52,12 @@ $(document).ready(function () {
       if (data.choices && data.choices.length > 0) {
         const aiMessage = data.choices[0].message.content.trim();
         $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
+        try {
+          const jsonData = JSON.parse(aiMessage);
+          populateFormWithJsonData(jsonData);
+        } catch (e) {
+          console.error("Error parsing AI response:", e);
+        }
       } else {
         $(".chat-messages").append(`<div class="chat-message ai-message">No response from AI.</div>`);
       }
