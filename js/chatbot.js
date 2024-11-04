@@ -232,25 +232,6 @@ $(document).ready(function () {
       }
     }
 
-    // Populate categories
-    if (jsonData["Reporte de ventas"]["Categorías más vendidas"]) {
-      jsonData["Reporte de ventas"]["Categorías más vendidas"].forEach((category) => {
-        let row = $("#categoriesTable tbody tr.category-row").filter(
-          function () {
-            return $(this).find(".category-select").val() === category.Categoría;
-          }
-        );
-
-        if (row.length === 0) {
-          $("#addCategory").click();
-          row = $("#categoriesTable tbody tr.category-row").last();
-        }
-
-        row.find(".category-select").val(category.Categoría);
-        row.find(".category-quantity").val(category.Cantidad).trigger("change");
-        row.find(".category-total").val(category.Total.replace('$', '')).trigger("change");
-      });
-    }
 
     // Populate products
     if (jsonData["Reporte de ventas"]["Productos más vendidos"]) {
