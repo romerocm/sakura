@@ -230,9 +230,35 @@
             </div>
         </div>
     </form>
-    <button type="button" class="btn btn-info w-100" id="openAIChatbot">
-        <i class="fas fa-robot"></i> Open AI Chatbot
-    </button>
+    <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-info" id="openAIChatbot">
+            <i class="fas fa-robot"></i> Open AI Chatbot
+        </button>
+        <button type="button" class="btn btn-secondary" id="openAISettings">
+            <i class="fas fa-cog"></i> Settings
+        </button>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Chatbot Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="apiKeyInput" class="form-label">OpenAI API Key</label>
+                        <input type="text" class="form-control" id="apiKeyInput" placeholder="Enter your OpenAI API Key">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveApiKey">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Chat Window -->
     <div id="chatWindow" class="chat-window">

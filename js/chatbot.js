@@ -1,5 +1,19 @@
 $(document).ready(function () {
-  // OpenAI Chatbot logic
+  // OpenAI Chatbot settings
+  $("#openAISettings").on("click", function () {
+    $("#settingsModal").modal("show");
+  });
+
+  $("#saveApiKey").on("click", function () {
+    const apiKey = $("#apiKeyInput").val();
+    if (apiKey.trim() !== "") {
+      localStorage.setItem("openai_api_key", apiKey);
+      alert("API Key saved successfully!");
+      $("#settingsModal").modal("hide");
+    } else {
+      alert("Please enter a valid API Key.");
+    }
+  });
   $("#openAIChatbot").on("click", function () {
     $("#chatWindow").toggle();
   });
