@@ -124,8 +124,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
+                // Insert into fact_sales
+                if (!empty($jsonData['products'])) {
+                    $factSalesQuery = "INSERT INTO fact_sales (
+                                        sale_date,
+                                        receta_id,
+                                        costo_receta_id,
+                                        order_type_id,
+                                        quantity,
+                                        total_amount,
+                                        discount_amount,
+                                        tip_amount,
+                                        summary_id
+                                    ) VALUES (
+                                        :sale_date,
+                                        :receta_id,
+                                        (SELECT costo_receta_id 
+                                         FROM costos_receta 
+                                         WHERE receta_id = :receta_id_for_cost
+                                         ORDER BY costo_receta_id DESC 
+                                         LIMIT 1),
+                                        :order_type_id,
+                                        :quantity,
+                                        :total_amount,
+                                        :discount_amount,
+                                        :tip_amount,
+                                        :summary_id
+                                    )";
+                    $factSalesStmt = $db->prepare($factSalesQuery);
+
+                    foreach ($jsonData['products'] as $product) {
+                        $factSalesStmt->bindParam(':sale_date', $jsonData['sale_date']);
+                        $factSalesStmt->bindParam(':receta_id', $product['recipe_id']);
+                        $factSalesStmt->bindParam(':receta_id_for_cost', $product['recipe_id']); // Bind recipe_id again for subquery
+                        $factSalesStmt->bindParam(':order_type_id', $product['order_type_id']);
+                        $factSalesStmt->bindParam(':quantity', $product['quantity']);
+                        $factSalesStmt->bindParam(':total_amount', $product['total']);
+                        $factSalesStmt->bindParam(':discount_amount', $product['discount_amount']);
+                        $factSalesStmt->bindParam(':tip_amount', $jsonData['tips']);
+                        $factSalesStmt->bindParam(':summary_id', $summary_id);
+                        $factSalesStmt->execute();
+                    }
+                }
+
                 $db->commit();
-                sendResponse(true, 'Daily sales summary added successfully!', ['summary_id' => $summary_id]);
+                sendResponse(true, 'Daily sales summary and fact sales added successfully!', ['summary_id' => $summary_id]);
                 break;
 
                 case 'categoria':
