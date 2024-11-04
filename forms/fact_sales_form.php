@@ -110,22 +110,6 @@
                                     <select class="form-select category-select" required>
                                         <option value="">Seleccionar...</option>
                                     </select>
-                                    <script>
-                                        $(document).ready(function() {
-                                            $('.recipe-select').select2({
-                                                placeholder: "Search for a product",
-                                                allowClear: true
-                                            });
-                                        });
-                                    </script>
-                                    <script>
-                                        $(document).ready(function() {
-                                            $('.category-select').select2({
-                                                placeholder: "Search for a category",
-                                                allowClear: true
-                                            });
-                                        });
-                                    </script>
                                 </td>
                                 <td>
                                     <div class="input-group input-group-sm">
@@ -246,4 +230,16 @@
             </div>
         </div>
     </form>
+    <script>
+        $(document).ready(function() {
+            $('.category-select').select2({
+                placeholder: "Search for a category",
+                allowClear: true
+            });
+            $('.recipe-select').select2({
+                placeholder: "Search for a product",
+                allowClear: true
+            });
+        });
+    </script>
 </div>
