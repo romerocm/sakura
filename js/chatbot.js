@@ -228,7 +228,6 @@ $(document).ready(function () {
       if (report.Propinas) $("#tips").val(report.Propinas.replace('$', ''));
       if (report["Cantidad de clientes"]) $("#customer_count").val(report["Cantidad de clientes"]);
       if (report.Ordenes) $("#orders_count").val(report.Ordenes);
-      if (report["Orden promedio"]) $("#average_order").val(report["Orden promedio"].replace('$', ''));
     }
 
     // Populate categories
@@ -246,7 +245,6 @@ $(document).ready(function () {
         }
 
         row.find(".category-select").val(category.Categoría);
-        row.find(".category-percentage").val(category.Porcentaje.replace('%', ''));
         row.find(".category-quantity").val(category.Cantidad);
         row.find(".category-total").val(category.Total.replace('$', ''));
       });
@@ -265,7 +263,6 @@ $(document).ready(function () {
         }
 
         row.find(".recipe-select").val(product.Producto);
-        row.find(".product-percentage").val(product.Porcentaje.replace('%', ''));
         row.find(".product-quantity").val(product.Cantidad);
         row.find(".product-total").val(product.Total.replace('$', ''));
       });
