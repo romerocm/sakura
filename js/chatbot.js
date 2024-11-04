@@ -245,8 +245,8 @@ $(document).ready(function () {
         }
 
         row.find(".category-select").val(category["Categoría"]);
-        row.find(".category-quantity").val(parseInt(category["Cantidad"]));
-        row.find(".category-total").val(parseFloat(category["Total"].replace('$', '')));
+        row.find(".category-quantity").val(category["Cantidad"]);
+        row.find(".category-total").val(category["Total"]);
       });
     }
 
@@ -263,8 +263,8 @@ $(document).ready(function () {
         }
 
         row.find(".recipe-select").val(product["Producto"]);
-        row.find(".product-quantity").val(parseInt(product["Cantidad"]));
-        row.find(".product-total").val(parseFloat(product["Total"].replace('$', '')));
+        row.find(".product-quantity").val(product["Cantidad"]);
+        row.find(".product-total").val(product["Total"]);
       });
     }
 
