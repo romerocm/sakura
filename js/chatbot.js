@@ -42,7 +42,7 @@ $(document).ready(function () {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4-turbo",
         messages: [
           { role: "system", content: "I need to fill my form with this data, please just focus on the fields that relate to the form we are working on." },
           { role: "user", content: message }
