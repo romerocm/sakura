@@ -165,7 +165,12 @@ function checkAllDependencies() {
 // Initialize when document is ready
 $(document).ready(function () {
   // Initialize Select2 on all select elements
-  $("select").select2();
+  $("select").select2().on("select2:open", function() {
+    let searchField = document.querySelector('.select2-search__field');
+    if (searchField) {
+      searchField.focus();
+    }
+  });
 
   // Initial load of select options
   loadSelectOptions();
