@@ -245,7 +245,6 @@ $(document).ready(function () {
           row = $("#productsTable tbody tr.product-row").last();
         }
 
-        row.find(".recipe-select").val(product.Producto);
         row.find(".product-quantity").val(product.Cantidad).trigger("change");
         row.find(".product-total").val(product.Total.replace('$', '')).trigger("change");
       });
