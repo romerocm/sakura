@@ -28,12 +28,16 @@ function loadSelectOptions() {
     $("#unidad_id").html(data);
   });
 
-  // Load ingredients into the select element only once
+  // Load ingredients into the select element only once and initialize Select2
   const ingredientSelect = $("#ingrediente_select");
   if (!ingredientSelect.data("loaded")) {
     $.get("includes/get_ingredients.php", function (data) {
       ingredientSelect.html(data);
       ingredientSelect.data("loaded", true);
+      ingredientSelect.select2({
+        placeholder: "Search for an ingredient",
+        allowClear: true
+      });
     });
   }
 
