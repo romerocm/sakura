@@ -216,18 +216,20 @@ $(document).ready(function () {
 
   function populateFormWithJsonData(jsonData) {
     // Populate form fields with JSON data
-    if (jsonData["Reporte de ventas"]["Fecha"]) {
-      const dateParts = jsonData["Reporte de ventas"]["Fecha"].split('/');
-      const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-      $("#sale_date").val(formattedDate).trigger("change");
-    }
-    if (jsonData["Reporte de ventas"]["Resumen"]) {
-      const resumen = jsonData["Reporte de ventas"]["Resumen"];
-      if (resumen["Venta total"]) $("#total_sales").val(resumen["Venta total"].replace('$', '')).trigger("change");
-      if (resumen["Venta neta"]) $("#net_sales").val(resumen["Venta neta"].replace('$', '')).trigger("change");
-      if (resumen["Propinas"]) $("#tips").val(resumen["Propinas"].replace('$', '')).trigger("change");
-      if (resumen["Cantidad de clientes"]) $("#customer_count").val(resumen["Cantidad de clientes"]).trigger("change");
-      if (resumen["Ordenes"]) $("#orders_count").val(resumen["Ordenes"]).trigger("change");
+    if (jsonData["Reporte de ventas"]) {
+      if (jsonData["Reporte de ventas"]["Fecha"]) {
+        const dateParts = jsonData["Reporte de ventas"]["Fecha"].split('/');
+        const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+        $("#sale_date").val(formattedDate).trigger("change");
+      }
+      if (jsonData["Reporte de ventas"]["Resumen"]) {
+        const resumen = jsonData["Reporte de ventas"]["Resumen"];
+        if (resumen["Venta total"]) $("#total_sales").val(resumen["Venta total"].replace('$', '')).trigger("change");
+        if (resumen["Venta neta"]) $("#net_sales").val(resumen["Venta neta"].replace('$', '')).trigger("change");
+        if (resumen["Propinas"]) $("#tips").val(resumen["Propinas"].replace('$', '')).trigger("change");
+        if (resumen["Cantidad de clientes"]) $("#customer_count").val(resumen["Cantidad de clientes"]).trigger("change");
+        if (resumen["Ordenes"]) $("#orders_count").val(resumen["Ordenes"]).trigger("change");
+      }
     }
 
     // Populate categories
