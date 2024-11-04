@@ -44,7 +44,7 @@ $(document).ready(function () {
       body: JSON.stringify({
         model: "gpt-4-turbo",
         messages: [
-          { role: "system", content: "Please convert the following sales report data into JSON format. Only return the JSON object, without any additional text or explanation." },
+          { role: "system", content: "Please convert the following sales report data into a complete JSON format. Ensure the JSON object is fully closed and contains no additional text or explanation." },
           { role: "user", content: message }
         ],
         max_tokens: 500,
@@ -56,8 +56,8 @@ $(document).ready(function () {
         const aiMessage = data.choices[0].message.content.trim();
         $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
         try {
-          // Ensure the response ends with a closing brace
-          if (aiMessage.trim().endsWith('}')) {
+          // Ensure the response starts with a brace and ends with a closing brace
+          if (aiMessage.trim().startsWith('{') && aiMessage.trim().endsWith('}')) {
             const jsonData = JSON.parse(aiMessage);
             if (jsonData && typeof jsonData === 'object') {
               populateFormWithJsonData(jsonData);
