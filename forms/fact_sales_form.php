@@ -235,7 +235,7 @@
     </button>
 
     <!-- Chat Window -->
-    <div id="chatWindow" class="chat-window" style="display: none;">
+    <div id="chatWindow" class="chat-window">
         <div class="chat-header">
             <h5>AI Chatbot</h5>
             <button type="button" class="close-chat">&times;</button>
