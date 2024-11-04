@@ -216,26 +216,26 @@ $(document).ready(function () {
 
   function populateFormWithJsonData(jsonData) {
     // Populate form fields with JSON data
-    if (jsonData["Fecha"]) {
-      const dateParts = jsonData["Fecha"].split('/');
+    if (jsonData["Reporte de ventas"]["Fecha"]) {
+      const dateParts = jsonData["Reporte de ventas"]["Fecha"].split('/');
       const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
       $("#sale_date").val(formattedDate).trigger("change");
     }
-    if (jsonData["ResumenVenta"]) {
-      const resumen = jsonData["ResumenVenta"];
-      if (resumen["VentaTotal"]) $("#total_sales").val(resumen["VentaTotal"].replace('$', '')).trigger("change");
-      if (resumen["VentaNeta"]) $("#net_sales").val(resumen["VentaNeta"].replace('$', '')).trigger("change");
+    if (jsonData["Reporte de ventas"]["Resumen"]) {
+      const resumen = jsonData["Reporte de ventas"]["Resumen"];
+      if (resumen["Venta total"]) $("#total_sales").val(resumen["Venta total"].replace('$', '')).trigger("change");
+      if (resumen["Venta neta"]) $("#net_sales").val(resumen["Venta neta"].replace('$', '')).trigger("change");
       if (resumen["Propinas"]) $("#tips").val(resumen["Propinas"].replace('$', '')).trigger("change");
-      if (resumen["CantidadDeClientes"]) $("#customer_count").val(resumen["CantidadDeClientes"]).trigger("change");
+      if (resumen["Cantidad de clientes"]) $("#customer_count").val(resumen["Cantidad de clientes"]).trigger("change");
       if (resumen["Ordenes"]) $("#orders_count").val(resumen["Ordenes"]).trigger("change");
     }
 
     // Populate categories
-    if (jsonData["CategoriasMasVendidas"]) {
-      jsonData["CategoriasMasVendidas"].forEach((category) => {
+    if (jsonData["Reporte de ventas"]["Categorías más vendidas"]) {
+      jsonData["Reporte de ventas"]["Categorías más vendidas"].forEach((category) => {
         let row = $("#categoriesTable tbody tr.category-row").filter(
           function () {
-            return $(this).find(".category-select").val() === category.Categoria;
+            return $(this).find(".category-select").val() === category.Categoría;
           }
         );
 
@@ -244,15 +244,15 @@ $(document).ready(function () {
           row = $("#categoriesTable tbody tr.category-row").last();
         }
 
-        row.find(".category-select").val(category.Categoria);
+        row.find(".category-select").val(category.Categoría);
         row.find(".category-quantity").val(category.Cantidad).trigger("change");
         row.find(".category-total").val(category.Total.replace('$', '')).trigger("change");
       });
     }
 
     // Populate products
-    if (jsonData["ProductosMasVendidos"]) {
-      jsonData["ProductosMasVendidos"].forEach((product) => {
+    if (jsonData["Reporte de ventas"]["Productos más vendidos"]) {
+      jsonData["Reporte de ventas"]["Productos más vendidos"].forEach((product) => {
         let row = $("#productsTable tbody tr.product-row").filter(function () {
           return $(this).find(".recipe-select").val() === product.Producto;
         });
