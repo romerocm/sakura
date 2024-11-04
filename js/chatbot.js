@@ -51,7 +51,7 @@ $(document).ready(function () {
           {
             role: "system",
             content:
-              "Please convert the following sales report data into a complete JSON format. Ensure the JSON object is fully closed and contains no additional text or explanation.",
+              "Please convert the following sales report data into a complete JSON format. Ensure the JSON object is fully closed and contains no additional text or explanation. Map 'drink' to 'BEBIDAS', 'sashimi' and 'nigiri' to 'SUSHI'.",
           },
           { role: "user", content: message },
         ],
