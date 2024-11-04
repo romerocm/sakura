@@ -158,29 +158,41 @@ $(document).ready(function () {
 
   function populateFormWithJsonData(jsonData) {
     // Populate form fields with JSON data
-    $("#sale_date").val(jsonData.sale_date);
-    $("#total_sales").val(jsonData.total_sales);
-    $("#net_sales").val(jsonData.net_sales);
-    $("#tips").val(jsonData.tips);
-    $("#customer_count").val(jsonData.customer_count);
+    if (jsonData.sale_date) $("#sale_date").val(jsonData.sale_date);
+    if (jsonData.total_sales) $("#total_sales").val(jsonData.total_sales);
+    if (jsonData.net_sales) $("#net_sales").val(jsonData.net_sales);
+    if (jsonData.tips) $("#tips").val(jsonData.tips);
+    if (jsonData.customer_count) $("#customer_count").val(jsonData.customer_count);
 
     // Populate categories
-    jsonData.categories.forEach((category, index) => {
-      const row = $("#categoriesTable tbody tr").eq(index);
-      row.find(".category-select").val(category.category_id);
-      row.find(".category-percentage").val(category.percentage);
-      row.find(".category-quantity").val(category.quantity);
-      row.find(".category-total").val(category.total);
-    });
+    if (jsonData.categories) {
+      jsonData.categories.forEach((category, index) => {
+        let row = $("#categoriesTable tbody tr").eq(index);
+        if (row.length === 0) {
+          $("#addCategory").click();
+          row = $("#categoriesTable tbody tr").last();
+        }
+        row.find(".category-select").val(category.category_id);
+        row.find(".category-percentage").val(category.percentage);
+        row.find(".category-quantity").val(category.quantity);
+        row.find(".category-total").val(category.total);
+      });
+    }
 
     // Populate products
-    jsonData.products.forEach((product, index) => {
-      const row = $("#productsTable tbody tr").eq(index);
-      row.find(".recipe-select").val(product.recipe_id);
-      row.find(".product-percentage").val(product.percentage);
-      row.find(".product-quantity").val(product.quantity);
-      row.find(".product-total").val(product.total);
-    });
+    if (jsonData.products) {
+      jsonData.products.forEach((product, index) => {
+        let row = $("#productsTable tbody tr").eq(index);
+        if (row.length === 0) {
+          $("#addProduct").click();
+          row = $("#productsTable tbody tr").last();
+        }
+        row.find(".recipe-select").val(product.recipe_id);
+        row.find(".product-percentage").val(product.percentage);
+        row.find(".product-quantity").val(product.quantity);
+        row.find(".product-total").val(product.total);
+      });
+    }
 
     updateTotals();
   }
