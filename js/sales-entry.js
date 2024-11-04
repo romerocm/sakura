@@ -67,7 +67,7 @@ $(document).ready(function () {
   }
 
   // Update totals and percentages
-  function updateTotals() {
+  window.updateTotals = function updateTotals() {
     const totalSales = parseFloat($("#total_sales").val()) || 0;
 
     // Category totals
