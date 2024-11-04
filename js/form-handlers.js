@@ -164,6 +164,9 @@ function checkAllDependencies() {
 
 // Initialize when document is ready
 $(document).ready(function () {
+  // Initialize Select2 on all select elements
+  $("select").select2();
+
   // Initial load of select options
   loadSelectOptions();
 

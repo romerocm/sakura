@@ -107,7 +107,7 @@
                         <tbody>
                             <tr class="category-row">
                                 <td>
-                                    <select class="form-select category-select" required>
+                                    <select class="form-select category-select select2" required>
                                         <option value="">Seleccionar...</option>
                                     </select>
                                 </td>
@@ -172,7 +172,7 @@
                         <tbody>
                             <tr class="product-row">
                                 <td>
-                                    <select class="form-select recipe-select" required>
+                                    <select class="form-select recipe-select select2" required>
                                         <option value="">Seleccionar...</option>
                                     </select>
                                 </td>
