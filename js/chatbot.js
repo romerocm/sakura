@@ -44,7 +44,7 @@ $(document).ready(function () {
       body: JSON.stringify({
         model: "gpt-4-turbo",
         messages: [
-          { role: "system", content: "Please convert the following sales report data into a JSON format suitable for filling the fact_sales_form.php. Ensure the output is valid JSON." },
+          { role: "system", content: "Please convert the following sales report data into JSON format. Only return the JSON object, without any additional text or explanation." },
           { role: "user", content: message }
         ],
         max_tokens: 300,
