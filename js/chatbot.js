@@ -74,6 +74,7 @@ $(document).ready(function () {
               const jsonData = JSON.parse(aiMessage);
               if (jsonData && typeof jsonData === "object") {
                 populateFormWithJsonData(jsonData);
+                updateTotals();
               } else {
                 console.error("AI response is not in JSON format:", aiMessage);
                 $(".chat-messages").append(
