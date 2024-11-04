@@ -198,7 +198,6 @@ $(document).ready(function () {
     updateTotals
   );
 
-  // Form submission
   $("#dailySalesForm").on("submit", function (e) {
     e.preventDefault();
 
