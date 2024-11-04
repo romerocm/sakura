@@ -30,7 +30,11 @@ $(document).ready(function () {
     $("#chatInput").val("");
 
     // Send the message to OpenAI and handle the response
-    const apiKey = 'YOUR_OPENAI_API_KEY'; // Replace with your actual OpenAI API key
+    const apiKey = localStorage.getItem("openai_api_key");
+    if (!apiKey) {
+      alert("API Key is not set. Please enter your OpenAI API Key in the settings.");
+      return;
+    }
     fetch("https://api.openai.com/v1/engines/davinci-codex/completions", {
       method: "POST",
       headers: {
