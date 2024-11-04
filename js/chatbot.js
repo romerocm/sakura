@@ -59,6 +59,7 @@ $(document).ready(function () {
           const jsonData = JSON.parse(aiMessage);
           if (jsonData && typeof jsonData === 'object') {
             populateFormWithJsonData(jsonData);
+            updateFormFields(jsonData);
           } else {
             console.error("AI response is not in JSON format:", aiMessage);
           }
@@ -100,6 +101,59 @@ $(document).ready(function () {
       console.error("Error processing data with OpenAI:", error);
       alert("An error occurred while processing data.");
     }
+  }
+
+  function updateFormFields(jsonData) {
+    // Update categories
+    jsonData.categories.forEach(category => {
+      $.ajax({
+        url: 'process.php',
+        type: 'POST',
+        data: {
+          form_type: 'categoria',
+          categoria_id: category.category_id,
+          nombre: category.name
+        },
+        success: function(response) {
+          if (response.success) {
+            showToast(`Category ${category.name} added successfully!`, "success");
+          } else {
+            showToast(`Error adding category ${category.name}: ${response.message}`, "danger");
+          }
+        },
+        error: function() {
+          showToast(`Error adding category ${category.name}`, "danger");
+        }
+      });
+    });
+
+    // Update products
+    jsonData.products.forEach(product => {
+      $.ajax({
+        url: 'process.php',
+        type: 'POST',
+        data: {
+          form_type: 'fact_sales',
+          receta_id: product.recipe_id,
+          order_type_id: product.order_type_id,
+          quantity: product.quantity,
+          total_amount: product.total,
+          discount_amount: product.discount_amount || 0,
+          tip_amount: jsonData.tips || 0,
+          sale_date: jsonData.sale_date
+        },
+        success: function(response) {
+          if (response.success) {
+            showToast(`Product ${product.recipe_id} added successfully!`, "success");
+          } else {
+            showToast(`Error adding product ${product.recipe_id}: ${response.message}`, "danger");
+          }
+        },
+        error: function() {
+          showToast(`Error adding product ${product.recipe_id}`, "danger");
+        }
+      });
+    });
   }
 
   function populateFormWithJsonData(jsonData) {
