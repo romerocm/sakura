@@ -35,14 +35,15 @@ $(document).ready(function () {
       alert("API Key is not set. Please enter your OpenAI API Key in the settings.");
       return;
     }
-    fetch("https://api.openai.com/v1/engines/davinci-codex/completions", {
+    fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        prompt: message,
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: message }],
         max_tokens: 150,
       }),
     })
