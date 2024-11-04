@@ -62,6 +62,7 @@ $(document).ready(function () {
             updateFormFields(jsonData);
           } else {
             console.error("AI response is not in JSON format:", aiMessage);
+            $(".chat-messages").append(`<div class="chat-message ai-message">AI response is not in JSON format. Please ensure the response is in JSON format.</div>`);
           }
         } catch (e) {
           console.error("Error parsing AI response:", e);
