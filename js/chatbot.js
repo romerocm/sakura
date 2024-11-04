@@ -231,36 +231,20 @@ $(document).ready(function () {
       if (report["Orden promedio"]) $("#average_order").val(report["Orden promedio"].replace('$', ''));
     }
 
-    // Populate categories
-    if (jsonData["Categorías Vendidas"]) {
-      jsonData["Categorías Vendidas"].forEach((category, index) => {
-        let row = $("#categoriesTable tbody tr").eq(index);
-        if (row.length === 0) {
-          $("#addCategory").click();
-          row = $("#categoriesTable tbody tr").last();
-        }
-        let categoryValue = category.Categoría.toUpperCase();
-        row.find(".category-select").val(categoryValue);
-        row.find(".category-percentage").val(category.Porcentaje.replace('%', ''));
-        row.find(".category-quantity").val(category.Cantidad);
-        row.find(".category-total").val(category.Total.replace('$', ''));
-      });
-    }
-
-    // Populate products
-    if (jsonData["Productos Vendidos"]) {
-      jsonData["Productos Vendidos"].forEach((product, index) => {
-        let row = $("#productsTable tbody tr").eq(index);
-        if (row.length === 0) {
-          $("#addProduct").click();
-          row = $("#productsTable tbody tr").last();
-        }
-        row.find(".recipe-select").val(product.Producto);
-        row.find(".product-percentage").val(product.Porcentaje.replace('%', ''));
-        row.find(".product-quantity").val(product.Cantidad);
-        row.find(".product-total").val(product.Total.replace('$', ''));
-      });
-    }
+    // Populate categories and products
+    const categoriesAndProducts = [...(jsonData["Categorías Vendidas"] || []), ...(jsonData["Productos Vendidos"] || [])];
+    categoriesAndProducts.forEach((item, index) => {
+      let row = $("#categoriesTable tbody tr").eq(index);
+      if (row.length === 0) {
+        $("#addCategory").click();
+        row = $("#categoriesTable tbody tr").last();
+      }
+      let itemValue = item.Categoría ? item.Categoría.toUpperCase() : item.Producto;
+      row.find(".category-select, .recipe-select").val(itemValue);
+      row.find(".category-percentage, .product-percentage").val(item.Porcentaje.replace('%', ''));
+      row.find(".category-quantity, .product-quantity").val(item.Cantidad);
+      row.find(".category-total, .product-total").val(item.Total.replace('$', ''));
+    });
 
     updateTotals();
   }
