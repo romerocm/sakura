@@ -26,83 +26,113 @@ $(document).ready(function () {
     const message = $("#chatInput").val();
     if (message.trim() === "") return;
 
-    $(".chat-messages").append(`<div class="chat-message user-message">${message}</div>`);
+    $(".chat-messages").append(
+      `<div class="chat-message user-message">${message}</div>`
+    );
     $("#chatInput").val("");
 
     // Send the message to OpenAI and handle the response
     const apiKey = localStorage.getItem("openai_api_key");
     if (!apiKey) {
-      alert("API Key is not set. Please enter your OpenAI API Key in the settings.");
+      alert(
+        "API Key is not set. Please enter your OpenAI API Key in the settings."
+      );
       return;
     }
     fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "gpt-4-turbo",
         messages: [
-          { role: "system", content: "Please convert the following sales report data into a complete JSON format. Ensure the JSON object is fully closed and contains no additional text or explanation." },
-          { role: "user", content: message }
+          {
+            role: "system",
+            content:
+              "Please convert the following sales report data into a complete JSON format. Ensure the JSON object is fully closed and contains no additional text or explanation.",
+          },
+          { role: "user", content: message },
         ],
-        max_tokens: 500,
+        max_tokens: 1200,
       }),
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.choices && data.choices.length > 0) {
-        const aiMessage = data.choices[0].message.content.trim();
-        $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
-        try {
-          // Ensure the response starts with a brace and ends with a closing brace
-          if (aiMessage.trim().startsWith('{') && aiMessage.trim().endsWith('}')) {
-            const jsonData = JSON.parse(aiMessage);
-            if (jsonData && typeof jsonData === 'object') {
-              populateFormWithJsonData(jsonData);
-              updateFormFields(jsonData);
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.choices && data.choices.length > 0) {
+          const aiMessage = data.choices[0].message.content.trim();
+          $(".chat-messages").append(
+            `<div class="chat-message ai-message">${aiMessage}</div>`
+          );
+          try {
+            // Ensure the response starts with a brace and ends with a closing brace
+            if (
+              aiMessage.trim().startsWith("{") &&
+              aiMessage.trim().endsWith("}")
+            ) {
+              const jsonData = JSON.parse(aiMessage);
+              if (jsonData && typeof jsonData === "object") {
+                populateFormWithJsonData(jsonData);
+                updateFormFields(jsonData);
+              } else {
+                console.error("AI response is not in JSON format:", aiMessage);
+                $(".chat-messages").append(
+                  `<div class="chat-message ai-message">AI response is not in JSON format. Please ensure the response is in JSON format.</div>`
+                );
+              }
             } else {
-              console.error("AI response is not in JSON format:", aiMessage);
-              $(".chat-messages").append(`<div class="chat-message ai-message">AI response is not in JSON format. Please ensure the response is in JSON format.</div>`);
+              console.error("AI response is incomplete:", aiMessage);
+              $(".chat-messages").append(
+                `<div class="chat-message ai-message">AI response is incomplete. Please ensure the response is complete and in JSON format.</div>`
+              );
+              $(".chat-messages").append(
+                `<div class="chat-message ai-message">Raw AI response: ${aiMessage}</div>`
+              );
             }
-          } else {
-            console.error("AI response is incomplete:", aiMessage);
-            $(".chat-messages").append(`<div class="chat-message ai-message">AI response is incomplete. Please ensure the response is complete and in JSON format.</div>`);
-            $(".chat-messages").append(`<div class="chat-message ai-message">Raw AI response: ${aiMessage}</div>`);
+          } catch (e) {
+            console.error("Error parsing AI response:", e);
+            $(".chat-messages").append(
+              `<div class="chat-message ai-message">Error parsing AI response. Please ensure the response is in JSON format.</div>`
+            );
+            $(".chat-messages").append(
+              `<div class="chat-message ai-message">Raw AI response: ${aiMessage}</div>`
+            );
           }
-        } catch (e) {
-          console.error("Error parsing AI response:", e);
-          $(".chat-messages").append(`<div class="chat-message ai-message">Error parsing AI response. Please ensure the response is in JSON format.</div>`);
-          $(".chat-messages").append(`<div class="chat-message ai-message">Raw AI response: ${aiMessage}</div>`);
+        } else {
+          $(".chat-messages").append(
+            `<div class="chat-message ai-message">No response from AI.</div>`
+          );
         }
-      } else {
-        $(".chat-messages").append(`<div class="chat-message ai-message">No response from AI.</div>`);
-      }
-    })
-    .catch(error => {
-      console.error("Error communicating with OpenAI:", error);
-      $(".chat-messages").append(`<div class="chat-message ai-message">Error communicating with AI.</div>`);
-    });
+      })
+      .catch((error) => {
+        console.error("Error communicating with OpenAI:", error);
+        $(".chat-messages").append(
+          `<div class="chat-message ai-message">Error communicating with AI.</div>`
+        );
+      });
   });
 
   async function processDataWithOpenAI(apiKey, excelData) {
     try {
-      const response = await fetch("https://api.openai.com/v1/engines/davinci-codex/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          prompt: `Convert the following sales report data into JSON format for the fields in the fact_sales_form.php. The data is structured as follows: 
+      const response = await fetch(
+        "https://api.openai.com/v1/engines/davinci-codex/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            prompt: `Convert the following sales report data into JSON format for the fields in the fact_sales_form.php. The data is structured as follows: 
           "Reporte de ventas - 1/10/2024
           Venta total: $52.94, Venta neta: $52.94, Propinas: $5.63, Descuentos: $3.26, Devoluciones: $0.00, Cantidad de clientes: 4, Promedio por clientes: $13.23, Ordenes: 3, Orden promedio: $17.65
           Categorías más vendidas: Bowls 53% 2 $27.90, Rolls 19% 1 $10.05, Sashimi 18% 1 $9.79, Bebidas 10% 2 $5.21
           Productos más vendidos: Tuna Steak Poke 26% 1 $13.95, Poke de Salmon 26% 1 $13.95, Sujin Roll 19% 1 $10.05, Yakisesamo 18% 1 $9.79, Michelob Ultra 6% 1 $3.25, Coca-Cola Zero 4% 1 $1.96"`,
-          max_tokens: 150,
-        }),
-      });
+            max_tokens: 150,
+          }),
+        }
+      );
 
       const result = await response.json();
       if (result.choices && result.choices.length > 0) {
@@ -119,53 +149,65 @@ $(document).ready(function () {
 
   function updateFormFields(jsonData) {
     // Update categories
-    jsonData.categories.forEach(category => {
+    jsonData.categories.forEach((category) => {
       $.ajax({
-        url: 'process.php',
-        type: 'POST',
+        url: "process.php",
+        type: "POST",
         data: {
-          form_type: 'categoria',
+          form_type: "categoria",
           categoria_id: category.category_id,
-          nombre: category.name
+          nombre: category.name,
         },
-        success: function(response) {
+        success: function (response) {
           if (response.success) {
-            showToast(`Category ${category.name} added successfully!`, "success");
+            showToast(
+              `Category ${category.name} added successfully!`,
+              "success"
+            );
           } else {
-            showToast(`Error adding category ${category.name}: ${response.message}`, "danger");
+            showToast(
+              `Error adding category ${category.name}: ${response.message}`,
+              "danger"
+            );
           }
         },
-        error: function() {
+        error: function () {
           showToast(`Error adding category ${category.name}`, "danger");
-        }
+        },
       });
     });
 
     // Update products
-    jsonData.products.forEach(product => {
+    jsonData.products.forEach((product) => {
       $.ajax({
-        url: 'process.php',
-        type: 'POST',
+        url: "process.php",
+        type: "POST",
         data: {
-          form_type: 'fact_sales',
+          form_type: "fact_sales",
           receta_id: product.recipe_id,
           order_type_id: product.order_type_id,
           quantity: product.quantity,
           total_amount: product.total,
           discount_amount: product.discount_amount || 0,
           tip_amount: jsonData.tips || 0,
-          sale_date: jsonData.sale_date
+          sale_date: jsonData.sale_date,
         },
-        success: function(response) {
+        success: function (response) {
           if (response.success) {
-            showToast(`Product ${product.recipe_id} added successfully!`, "success");
+            showToast(
+              `Product ${product.recipe_id} added successfully!`,
+              "success"
+            );
           } else {
-            showToast(`Error adding product ${product.recipe_id}: ${response.message}`, "danger");
+            showToast(
+              `Error adding product ${product.recipe_id}: ${response.message}`,
+              "danger"
+            );
           }
         },
-        error: function() {
+        error: function () {
           showToast(`Error adding product ${product.recipe_id}`, "danger");
-        }
+        },
       });
     });
   }
@@ -176,7 +218,8 @@ $(document).ready(function () {
     if (jsonData.total_sales) $("#total_sales").val(jsonData.total_sales);
     if (jsonData.net_sales) $("#net_sales").val(jsonData.net_sales);
     if (jsonData.tips) $("#tips").val(jsonData.tips);
-    if (jsonData.customer_count) $("#customer_count").val(jsonData.customer_count);
+    if (jsonData.customer_count)
+      $("#customer_count").val(jsonData.customer_count);
 
     // Populate categories
     if (jsonData.categories) {
