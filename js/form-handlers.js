@@ -197,15 +197,19 @@ function checkAllDependencies() {
 
 // Initialize when document is ready
 $(document).ready(function () {
-    // Initialize Select2 for dropdowns
+    // Initialize Select2 for category dropdowns
     $('.category-select').select2({
         placeholder: "Search for a category",
         allowClear: true
     });
+
+    // Initialize Select2 for recipe dropdowns
     $('.recipe-select').select2({
         placeholder: "Search for a product",
         allowClear: true
     });
+
+    // Additional initialization code if needed
   // Initial load of select options
   loadSelectOptions();
 
