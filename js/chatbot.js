@@ -15,11 +15,32 @@ $(document).ready(function () {
     $(".chat-messages").append(`<div class="chat-message user-message">${message}</div>`);
     $("#chatInput").val("");
 
-    // Here you would send the message to OpenAI and handle the response
-    // For now, we'll simulate a response
-    setTimeout(() => {
-      $(".chat-messages").append(`<div class="chat-message ai-message">This is a simulated response.</div>`);
-    }, 1000);
+    // Send the message to OpenAI and handle the response
+    const apiKey = 'YOUR_OPENAI_API_KEY'; // Replace with your actual OpenAI API key
+    fetch("https://api.openai.com/v1/engines/davinci-codex/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        prompt: message,
+        max_tokens: 150,
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.choices && data.choices.length > 0) {
+        const aiMessage = data.choices[0].text.trim();
+        $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
+      } else {
+        $(".chat-messages").append(`<div class="chat-message ai-message">No response from AI.</div>`);
+      }
+    })
+    .catch(error => {
+      console.error("Error communicating with OpenAI:", error);
+      $(".chat-messages").append(`<div class="chat-message ai-message">Error communicating with AI.</div>`);
+    });
   });
 
   async function processDataWithOpenAI(apiKey, excelData) {
