@@ -234,7 +234,7 @@ $(document).ready(function () {
 
 
     // Populate products
-    if (jsonData["Reporte de ventas"]["Productos más vendidos"]) {
+    if (jsonData["Reporte de ventas"] && jsonData["Reporte de ventas"]["Productos más vendidos"]) {
       jsonData["Reporte de ventas"]["Productos más vendidos"].forEach((product) => {
         let row = $("#productsTable tbody tr.product-row").filter(function () {
           return $(this).find(".recipe-select").val() === product.Producto;
