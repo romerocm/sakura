@@ -50,7 +50,7 @@ $(document).ready(function () {
     .then(response => response.json())
     .then(data => {
       if (data.choices && data.choices.length > 0) {
-        const aiMessage = data.choices[0].text.trim();
+        const aiMessage = data.choices[0].message.content.trim();
         $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
       } else {
         $(".chat-messages").append(`<div class="chat-message ai-message">No response from AI.</div>`);
