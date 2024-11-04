@@ -218,16 +218,16 @@ $(document).ready(function () {
     // Populate form fields with JSON data
     if (jsonData["Reporte de ventas"]) {
       const report = jsonData["Reporte de ventas"];
-      if (report.Fecha) {
-        const dateParts = report.Fecha.split('/');
+      if (report["Fecha"]) {
+        const dateParts = report["Fecha"].split('/');
         const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
         $("#sale_date").val(formattedDate);
       }
-      if (report["Venta total"]) $("#total_sales").val(report["Venta total"].replace('$', ''));
-      if (report["Venta neta"]) $("#net_sales").val(report["Venta neta"].replace('$', ''));
-      if (report.Propinas) $("#tips").val(report.Propinas.replace('$', ''));
-      if (report["Cantidad de clientes"]) $("#customer_count").val(report["Cantidad de clientes"]);
-      if (report.Ordenes) $("#orders_count").val(report.Ordenes);
+      if (report["Venta total"]) $("#total_sales").val(parseFloat(report["Venta total"].replace('$', '')));
+      if (report["Venta neta"]) $("#net_sales").val(parseFloat(report["Venta neta"].replace('$', '')));
+      if (report["Propinas"]) $("#tips").val(parseFloat(report["Propinas"].replace('$', '')));
+      if (report["Cantidad de clientes"]) $("#customer_count").val(parseInt(report["Cantidad de clientes"]));
+      if (report["Ordenes"]) $("#orders_count").val(parseInt(report["Ordenes"]));
     }
 
     // Populate categories
@@ -244,9 +244,9 @@ $(document).ready(function () {
           row = $("#categoriesTable tbody tr.category-row").last();
         }
 
-        row.find(".category-select").val(category.Categoría);
-        row.find(".category-quantity").val(category.Cantidad);
-        row.find(".category-total").val(category.Total.replace('$', ''));
+        row.find(".category-select").val(category["Categoría"]);
+        row.find(".category-quantity").val(parseInt(category["Cantidad"]));
+        row.find(".category-total").val(parseFloat(category["Total"].replace('$', '')));
       });
     }
 
@@ -262,9 +262,9 @@ $(document).ready(function () {
           row = $("#productsTable tbody tr.product-row").last();
         }
 
-        row.find(".recipe-select").val(product.Producto);
-        row.find(".product-quantity").val(product.Cantidad);
-        row.find(".product-total").val(product.Total.replace('$', ''));
+        row.find(".recipe-select").val(product["Producto"]);
+        row.find(".product-quantity").val(parseInt(product["Cantidad"]));
+        row.find(".product-total").val(parseFloat(product["Total"].replace('$', '')));
       });
     }
 
