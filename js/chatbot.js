@@ -47,7 +47,7 @@ $(document).ready(function () {
           { role: "system", content: "I need to fill my form with this data, please just focus on the fields that relate to the form we are working on." },
           { role: "user", content: message }
         ],
-        max_tokens: 150,
+        max_tokens: 300,
       }),
     })
     .then(response => response.json())
@@ -57,7 +57,11 @@ $(document).ready(function () {
         $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
         try {
           const jsonData = JSON.parse(aiMessage);
-          populateFormWithJsonData(jsonData);
+          if (jsonData && typeof jsonData === 'object') {
+            populateFormWithJsonData(jsonData);
+          } else {
+            console.error("AI response is not in JSON format:", aiMessage);
+          }
         } catch (e) {
           console.error("Error parsing AI response:", e);
         }
@@ -80,7 +84,7 @@ $(document).ready(function () {
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          prompt: `Analyze the following Excel data and return a JSON format: ${excelData}`,
+          prompt: `Analyze the following Excel data and return a JSON format specifically for the fields in the fact_sales_form.php: ${excelData}`,
           max_tokens: 150,
         }),
       });
