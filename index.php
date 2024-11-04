@@ -12,6 +12,9 @@
     <link href="css/main.css" rel="stylesheet">
     <link href="css/forms.css" rel="stylesheet">
     <link href="css/sales.css" rel="stylesheet">
+    <!-- Select2 CSS and JS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 </head>
 <body>
     <div class="container mt-4">
