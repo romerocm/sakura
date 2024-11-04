@@ -219,15 +219,15 @@ $(document).ready(function () {
     if (jsonData["Fecha"]) {
       const dateParts = jsonData["Fecha"].split('/');
       const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-      $("#sale_date").val(formattedDate);
+      $("#sale_date").val(formattedDate).trigger("change");
     }
     if (jsonData["ResumenVenta"]) {
       const resumen = jsonData["ResumenVenta"];
-      if (resumen["VentaTotal"]) $("#total_sales").val(resumen["VentaTotal"].replace('$', ''));
-      if (resumen["VentaNeta"]) $("#net_sales").val(resumen["VentaNeta"].replace('$', ''));
-      if (resumen["Propinas"]) $("#tips").val(resumen["Propinas"].replace('$', ''));
-      if (resumen["CantidadDeClientes"]) $("#customer_count").val(resumen["CantidadDeClientes"]);
-      if (resumen["Ordenes"]) $("#orders_count").val(resumen["Ordenes"]);
+      if (resumen["VentaTotal"]) $("#total_sales").val(resumen["VentaTotal"].replace('$', '')).trigger("change");
+      if (resumen["VentaNeta"]) $("#net_sales").val(resumen["VentaNeta"].replace('$', '')).trigger("change");
+      if (resumen["Propinas"]) $("#tips").val(resumen["Propinas"].replace('$', '')).trigger("change");
+      if (resumen["CantidadDeClientes"]) $("#customer_count").val(resumen["CantidadDeClientes"]).trigger("change");
+      if (resumen["Ordenes"]) $("#orders_count").val(resumen["Ordenes"]).trigger("change");
     }
 
     // Populate categories
@@ -245,8 +245,8 @@ $(document).ready(function () {
         }
 
         row.find(".category-select").val(category.Categoria);
-        row.find(".category-quantity").val(category.Cantidad);
-        row.find(".category-total").val(category.Total.replace('$', ''));
+        row.find(".category-quantity").val(category.Cantidad).trigger("change");
+        row.find(".category-total").val(category.Total.replace('$', '')).trigger("change");
       });
     }
 
@@ -263,8 +263,8 @@ $(document).ready(function () {
         }
 
         row.find(".recipe-select").val(product.Producto);
-        row.find(".product-quantity").val(product.Cantidad);
-        row.find(".product-total").val(product.Total.replace('$', ''));
+        row.find(".product-quantity").val(product.Cantidad).trigger("change");
+        row.find(".product-total").val(product.Total.replace('$', '')).trigger("change");
       });
     }
 
