@@ -214,40 +214,44 @@ $(document).ready(function () {
 
   function populateFormWithJsonData(jsonData) {
     // Populate form fields with JSON data
-    if (jsonData.sale_date) $("#sale_date").val(jsonData.sale_date);
-    if (jsonData.total_sales) $("#total_sales").val(jsonData.total_sales);
-    if (jsonData.net_sales) $("#net_sales").val(jsonData.net_sales);
-    if (jsonData.tips) $("#tips").val(jsonData.tips);
-    if (jsonData.customer_count)
-      $("#customer_count").val(jsonData.customer_count);
+    if (jsonData["Reporte de ventas"]) {
+      const report = jsonData["Reporte de ventas"];
+      if (report.Fecha) $("#sale_date").val(report.Fecha);
+      if (report["Venta total"]) $("#total_sales").val(report["Venta total"].replace('$', ''));
+      if (report["Venta neta"]) $("#net_sales").val(report["Venta neta"].replace('$', ''));
+      if (report.Propinas) $("#tips").val(report.Propinas.replace('$', ''));
+      if (report["Cantidad de clientes"]) $("#customer_count").val(report["Cantidad de clientes"]);
+      if (report.Ordenes) $("#orders_count").val(report.Ordenes);
+      if (report["Orden promedio"]) $("#average_order").val(report["Orden promedio"].replace('$', ''));
+    }
 
     // Populate categories
-    if (jsonData.categories) {
-      jsonData.categories.forEach((category, index) => {
+    if (jsonData["Categorías más vendidas"]) {
+      jsonData["Categorías más vendidas"].forEach((category, index) => {
         let row = $("#categoriesTable tbody tr").eq(index);
         if (row.length === 0) {
           $("#addCategory").click();
           row = $("#categoriesTable tbody tr").last();
         }
-        row.find(".category-select").val(category.category_id);
-        row.find(".category-percentage").val(category.percentage);
-        row.find(".category-quantity").val(category.quantity);
-        row.find(".category-total").val(category.total);
+        row.find(".category-select").val(category.Categoría);
+        row.find(".category-percentage").val(category.Porcentaje.replace('%', ''));
+        row.find(".category-quantity").val(category.Cantidad);
+        row.find(".category-total").val(category.Total.replace('$', ''));
       });
     }
 
     // Populate products
-    if (jsonData.products) {
-      jsonData.products.forEach((product, index) => {
+    if (jsonData["Productos más vendidos"]) {
+      jsonData["Productos más vendidos"].forEach((product, index) => {
         let row = $("#productsTable tbody tr").eq(index);
         if (row.length === 0) {
           $("#addProduct").click();
           row = $("#productsTable tbody tr").last();
         }
-        row.find(".recipe-select").val(product.recipe_id);
-        row.find(".product-percentage").val(product.percentage);
-        row.find(".product-quantity").val(product.quantity);
-        row.find(".product-total").val(product.total);
+        row.find(".recipe-select").val(product.Producto);
+        row.find(".product-percentage").val(product.Porcentaje.replace('%', ''));
+        row.find(".product-quantity").val(product.Cantidad);
+        row.find(".product-total").val(product.Total.replace('$', ''));
       });
     }
 
