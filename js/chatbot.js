@@ -65,6 +65,7 @@ $(document).ready(function () {
           }
         } catch (e) {
           console.error("Error parsing AI response:", e);
+          $(".chat-messages").append(`<div class="chat-message ai-message">Error parsing AI response. Please ensure the response is in JSON format.</div>`);
         }
       } else {
         $(".chat-messages").append(`<div class="chat-message ai-message">No response from AI.</div>`);
