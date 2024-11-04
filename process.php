@@ -3,6 +3,11 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
+// Add error logging
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+error_reporting(E_ALL);
+
 function sendResponse($success, $message, $data = null) {
     $response = [
         'success' => $success,
@@ -11,6 +16,7 @@ function sendResponse($success, $message, $data = null) {
     if ($data !== null) {
         $response['data'] = $data;
     }
+    error_log("Sending response: " . json_encode($response));
     echo json_encode($response);
     exit;
 }
@@ -23,23 +29,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
     
     if (strpos($contentType, "application/json") !== false) {
-        // Handle JSON data (for daily sales summary)
         $jsonData = json_decode(file_get_contents("php://input"), true);
+        error_log("Received JSON data: " . json_encode($jsonData));
+        
         if ($jsonData === null) {
+            error_log("JSON decode error: " . json_last_error_msg());
             sendResponse(false, "Invalid JSON data");
         }
         $form_type = $jsonData['form_type'];
     } else {
-        // Handle regular form data
         $form_type = $_POST['form_type'];
     }
 
     try {
         $db->beginTransaction();
+        error_log("Starting transaction for form type: " . $form_type);
 
         switch($form_type) {
             case 'daily_sales_summary':
-                // Insert into daily_sales_summary
+                // Validate and convert numeric values
+                $saleDate = date('Y-m-d', strtotime($jsonData['sale_date']));
+                $totalSales = (float)$jsonData['total_sales'];
+                $netSales = (float)$jsonData['net_sales'];
+                $tips = (float)$jsonData['tips'];
+                $customerCount = (int)$jsonData['customer_count'];
+
+                error_log("Processing daily sales summary with values: " . json_encode([
+                    'sale_date' => $saleDate,
+                    'total_sales' => $totalSales,
+                    'net_sales' => $netSales,
+                    'tips' => $tips,
+                    'customer_count' => $customerCount
+                ]));
+
+                // Insert daily summary
                 $query = "INSERT INTO daily_sales_summary (
                             sale_date, 
                             total_sales, 
@@ -54,17 +77,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             :customer_count
                         )";
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(':sale_date', $jsonData['sale_date']);
-                $stmt->bindParam(':total_sales', $jsonData['total_sales']);
-                $stmt->bindParam(':net_sales', $jsonData['net_sales']);
-                $stmt->bindParam(':tips', $jsonData['tips']);
-                $stmt->bindParam(':customer_count', $jsonData['customer_count']);
-                $stmt->execute();
                 
+                $stmt->bindValue(':sale_date', $saleDate);
+                $stmt->bindValue(':total_sales', $totalSales);
+                $stmt->bindValue(':net_sales', $netSales);
+                $stmt->bindValue(':tips', $tips);
+                $stmt->bindValue(':customer_count', $customerCount);
+                
+                $stmt->execute();
                 $summary_id = $db->lastInsertId();
+                error_log("Daily summary inserted with ID: " . $summary_id);
 
                 // Insert category summaries
                 if (!empty($jsonData['categories'])) {
+                    error_log("Processing categories: " . count($jsonData['categories']));
+                    
                     $categoryQuery = "INSERT INTO category_sales_summary (
                                     summary_id, 
                                     categoria_id, 
@@ -81,18 +108,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $categoryStmt = $db->prepare($categoryQuery);
 
                     foreach ($jsonData['categories'] as $category) {
-                        $categoryStmt->bindParam(':summary_id', $summary_id);
-                        $categoryStmt->bindParam(':categoria_id', $category['category_id']);
-                        $categoryStmt->bindParam(':percentage', $category['percentage']);
-                        $categoryStmt->bindParam(':quantity', $category['quantity']);
-                        $categoryStmt->bindParam(':total', $category['total']);
+                        $categoryStmt->bindValue(':summary_id', $summary_id);
+                        $categoryStmt->bindValue(':categoria_id', (int)$category['category_id']);
+                        $categoryStmt->bindValue(':percentage', (float)$category['percentage']);
+                        $categoryStmt->bindValue(':quantity', (int)$category['quantity']);
+                        $categoryStmt->bindValue(':total', (float)$category['total']);
+                        
+                        error_log("Inserting category: " . json_encode($category));
                         $categoryStmt->execute();
                     }
                 }
 
-                // Insert product summaries and fact_sales
+                // Insert product summaries
                 if (!empty($jsonData['products'])) {
-                    // Prepare statements for both tables
+                    error_log("Processing products: " . count($jsonData['products']));
+                    
                     $productQuery = "INSERT INTO product_sales_summary (
                                     summary_id, 
                                     receta_id, 
@@ -110,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 )";
                     $productStmt = $db->prepare($productQuery);
 
+                    // Also prepare fact_sales insert
                     $salesQuery = "INSERT INTO fact_sales (
                                     sale_date,
                                     receta_id,
@@ -135,296 +166,200 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     foreach ($jsonData['products'] as $product) {
                         // Insert into product_sales_summary
-                        $productStmt->bindParam(':summary_id', $summary_id);
-                        $productStmt->bindParam(':receta_id', $product['recipe_id']);
-                        $productStmt->bindParam(':costo_receta_id', $product['costo_receta_id']);
-                        $productStmt->bindParam(':percentage', $product['percentage']);
-                        $productStmt->bindParam(':quantity', $product['quantity']);
-                        $productStmt->bindParam(':total', $product['total']);
+                        $productStmt->bindValue(':summary_id', $summary_id);
+                        $productStmt->bindValue(':receta_id', (int)$product['recipe_id']);
+                        $productStmt->bindValue(':costo_receta_id', (int)$product['costo_receta_id']);
+                        $productStmt->bindValue(':percentage', (float)$product['percentage']);
+                        $productStmt->bindValue(':quantity', (int)$product['quantity']);
+                        $productStmt->bindValue(':total', (float)$product['total']);
+                        
+                        error_log("Inserting product summary: " . json_encode($product));
                         $productStmt->execute();
 
                         // Insert into fact_sales
-                        $salesStmt->bindParam(':sale_date', $jsonData['sale_date']);
-                        $salesStmt->bindParam(':receta_id', $product['recipe_id']);
-                        $salesStmt->bindParam(':costo_receta_id', $product['costo_receta_id']);
+                        $salesStmt->bindValue(':sale_date', $saleDate);
+                        $salesStmt->bindValue(':receta_id', (int)$product['recipe_id']);
+                        $salesStmt->bindValue(':costo_receta_id', (int)$product['costo_receta_id']);
                         $salesStmt->bindValue(':order_type_id', 1); // Default order type
-                        $salesStmt->bindParam(':quantity', $product['quantity']);
-                        $salesStmt->bindParam(':total_amount', $product['total']);
+                        $salesStmt->bindValue(':quantity', (int)$product['quantity']);
+                        $salesStmt->bindValue(':total_amount', (float)$product['total']);
                         $salesStmt->bindValue(':discount_amount', 0);
                         $salesStmt->bindValue(':tip_amount', 0);
-                        $salesStmt->bindParam(':summary_id', $summary_id);
+                        $salesStmt->bindValue(':summary_id', $summary_id);
+                        
+                        error_log("Inserting fact sales: " . json_encode($product));
                         $salesStmt->execute();
                     }
                 }
 
                 $db->commit();
+                error_log("Transaction committed successfully");
                 sendResponse(true, 'Daily sales summary added successfully!', ['summary_id' => $summary_id]);
                 break;
 
-                case 'categoria':
-                    if (!empty($_POST['categoria_id'])) {
-                        $query = "INSERT INTO categoria (categoria_id, nombre) VALUES (:categoria_id, :nombre)";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':categoria_id', $_POST['categoria_id']);
-                    } else {
-                        $query = "INSERT INTO categoria (nombre) VALUES (:nombre)";
-                        $stmt = $db->prepare($query);
-                    }
-                    $stmt->bindParam(':nombre', $_POST['nombre']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Category added successfully!');
-                    break;
+                case 'daily_sales_summary':
+                    // Validate and convert numeric values
+                    $saleDate = date('Y-m-d', strtotime($jsonData['sale_date']));
+                    $totalSales = (float)$jsonData['total_sales'];
+                    $netSales = (float)$jsonData['net_sales'];
+                    $tips = (float)$jsonData['tips'];
+                    $customerCount = (int)$jsonData['customer_count'];
     
-                case 'costos_receta':
-                    if (!empty($_POST['costo_receta_id'])) {
-                        $query = "INSERT INTO costos_receta (
-                                    costo_receta_id, 
-                                    receta_id, 
-                                    receta_ingredientes_id, 
-                                    costo_total_materia_prima, 
-                                    margen_error_porcentaje,
-                                    margen_error_costo_total,
-                                    costo_total_preparacion, 
-                                    costo_por_porcion, 
-                                    porcentaje_costo_mp, 
-                                    precio_potencial_venta,
-                                    impuesto_consumo_porcentaje,
-                                    impuesto_consumo_costo_total,
-                                    precio_venta, 
-                                    precio_carta, 
-                                    precio_real_venta, 
-                                    iva_por_porcion,
-                                    iva_porcion_costo_total,
-                                    porcentaje_real_costo
-                                ) VALUES (
-                                    :costo_receta_id,
-                                    :receta_id, 
-                                    :receta_ingredientes_id, 
-                                    :costo_total_materia_prima, 
-                                    :margen_error_porcentaje,
-                                    :margen_error_costo_total,
-                                    :costo_total_preparacion, 
-                                    :costo_por_porcion, 
-                                    :porcentaje_costo_mp, 
-                                    :precio_potencial_venta,
-                                    :impuesto_consumo_porcentaje,
-                                    :impuesto_consumo_costo_total,
-                                    :precio_venta,
-                                    :precio_carta, 
-                                    :precio_real_venta, 
-                                    :iva_por_porcion,
-                                    :iva_porcion_costo_total,
-                                    :porcentaje_real_costo
-                                )";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':costo_receta_id', $_POST['costo_receta_id']);
-                    } else {
-                        $query = "INSERT INTO costos_receta (
-                                    receta_id, 
-                                    receta_ingredientes_id, 
-                                    costo_total_materia_prima, 
-                                    margen_error_porcentaje,
-                                    margen_error_costo_total,
-                                    costo_total_preparacion, 
-                                    costo_por_porcion, 
-                                    porcentaje_costo_mp, 
-                                    precio_potencial_venta,
-                                    impuesto_consumo_porcentaje,
-                                    impuesto_consumo_costo_total,
-                                    precio_venta, 
-                                    precio_carta, 
-                                    precio_real_venta, 
-                                    iva_por_porcion,
-                                    iva_porcion_costo_total,
-                                    porcentaje_real_costo
-                                ) VALUES (
-                                    :receta_id, 
-                                    :receta_ingredientes_id, 
-                                    :costo_total_materia_prima, 
-                                    :margen_error_porcentaje,
-                                    :margen_error_costo_total,
-                                    :costo_total_preparacion, 
-                                    :costo_por_porcion, 
-                                    :porcentaje_costo_mp, 
-                                    :precio_potencial_venta,
-                                    :impuesto_consumo_porcentaje,
-                                    :impuesto_consumo_costo_total,
-                                    :precio_venta,
-                                    :precio_carta, 
-                                    :precio_real_venta, 
-                                    :iva_por_porcion,
-                                    :iva_porcion_costo_total,
-                                    :porcentaje_real_costo
-                                )";
-                        $stmt = $db->prepare($query);
-                    }
+                    error_log("Processing daily sales summary with values: " . json_encode([
+                        'sale_date' => $saleDate,
+                        'total_sales' => $totalSales,
+                        'net_sales' => $netSales,
+                        'tips' => $tips,
+                        'customer_count' => $customerCount
+                    ]));
+    
+                    // Insert daily summary
+                    $query = "INSERT INTO daily_sales_summary (
+                                sale_date, 
+                                total_sales, 
+                                net_sales, 
+                                tips, 
+                                customer_count
+                            ) VALUES (
+                                :sale_date, 
+                                :total_sales, 
+                                :net_sales, 
+                                :tips, 
+                                :customer_count
+                            )";
+                    $stmt = $db->prepare($query);
                     
-                    // Bind all parameters
-                    $stmt->bindParam(':receta_id', $_POST['receta_id']);
-                    $stmt->bindParam(':receta_ingredientes_id', $_POST['receta_ingredientes_id']);
-                    $stmt->bindParam(':costo_total_materia_prima', $_POST['costo_total_materia_prima']);
-                    $stmt->bindParam(':margen_error_porcentaje', $_POST['margen_error_porcentaje']);
-                    $stmt->bindParam(':margen_error_costo_total', $_POST['margen_error_costo_total']);
-                    $stmt->bindParam(':costo_total_preparacion', $_POST['costo_total_preparacion']);
-                    $stmt->bindParam(':costo_por_porcion', $_POST['costo_por_porcion']);
-                    $stmt->bindParam(':porcentaje_costo_mp', $_POST['porcentaje_costo_mp']);
-                    $stmt->bindParam(':precio_potencial_venta', $_POST['precio_potencial_venta']);
-                    $stmt->bindParam(':impuesto_consumo_porcentaje', $_POST['impuesto_consumo_porcentaje']);
-                    $stmt->bindParam(':impuesto_consumo_costo_total', $_POST['impuesto_consumo_costo_total']);
-                    $stmt->bindParam(':precio_venta', $_POST['precio_venta']);
-                    $stmt->bindParam(':precio_carta', $_POST['precio_carta']);
-                    $stmt->bindParam(':precio_real_venta', $_POST['precio_real_venta']);
-                    $stmt->bindParam(':iva_por_porcion', $_POST['iva_por_porcion']);
-                    $stmt->bindParam(':iva_porcion_costo_total', $_POST['iva_porcion_costo_total']);
-                    $stmt->bindParam(':porcentaje_real_costo', $_POST['porcentaje_real_costo']);
+                    $stmt->bindValue(':sale_date', $saleDate);
+                    $stmt->bindValue(':total_sales', $totalSales);
+                    $stmt->bindValue(':net_sales', $netSales);
+                    $stmt->bindValue(':tips', $tips);
+                    $stmt->bindValue(':customer_count', $customerCount);
                     
                     $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Recipe costs added successfully!');
-                    break;
+                    $summary_id = $db->lastInsertId();
+                    error_log("Daily summary inserted with ID: " . $summary_id);
     
-                case 'dim_order_type':
-                    if (!empty($_POST['order_type_id'])) {
-                        $query = "INSERT INTO dim_order_type (order_type_id, order_type, description) VALUES (:order_type_id, :order_type, :description)";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':order_type_id', $_POST['order_type_id']);
-                    } else {
-                        $query = "INSERT INTO dim_order_type (order_type, description) VALUES (:order_type, :description)";
-                        $stmt = $db->prepare($query);
+                    // Insert category summaries
+                    if (!empty($jsonData['categories'])) {
+                        error_log("Processing categories: " . count($jsonData['categories']));
+                        
+                        $categoryQuery = "INSERT INTO category_sales_summary (
+                                        summary_id, 
+                                        categoria_id, 
+                                        percentage, 
+                                        quantity, 
+                                        total
+                                    ) VALUES (
+                                        :summary_id, 
+                                        :categoria_id, 
+                                        :percentage, 
+                                        :quantity, 
+                                        :total
+                                    )";
+                        $categoryStmt = $db->prepare($categoryQuery);
+    
+                        foreach ($jsonData['categories'] as $category) {
+                            $categoryStmt->bindValue(':summary_id', $summary_id);
+                            $categoryStmt->bindValue(':categoria_id', (int)$category['category_id']);
+                            $categoryStmt->bindValue(':percentage', (float)$category['percentage']);
+                            $categoryStmt->bindValue(':quantity', (int)$category['quantity']);
+                            $categoryStmt->bindValue(':total', (float)$category['total']);
+                            
+                            error_log("Inserting category: " . json_encode($category));
+                            $categoryStmt->execute();
+                        }
                     }
-                    $stmt->bindParam(':order_type', $_POST['order_type']);
-                    $stmt->bindParam(':description', $_POST['description']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Order type added successfully!');
-                    break;
     
-                case 'fact_sales':
-                    if (!empty($_POST['sale_id'])) {
-                        $query = "INSERT INTO fact_sales (
-                            sale_id, sale_date, receta_id, costo_receta_id, order_type_id, quantity, 
-                            total_amount, discount_amount, tip_amount, summary_id
-                        ) VALUES (
-                            :sale_id, :sale_date, :receta_id, :costo_receta_id, :order_type_id, :quantity,
-                            :total_amount, :discount_amount, :tip_amount, :summary_id
-                        )";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':sale_id', $_POST['sale_id']);
-                    } else {
-                        $query = "INSERT INTO fact_sales (
-                            sale_date, receta_id, costo_receta_id, order_type_id, quantity, 
-                            total_amount, discount_amount, tip_amount, summary_id
-                        ) VALUES (
-                            :sale_date, :receta_id, :costo_receta_id, :order_type_id, :quantity,
-                            :total_amount, :discount_amount, :tip_amount, :summary_id
-                        )";
-                        $stmt = $db->prepare($query);
+                    // Insert product summaries
+                    if (!empty($jsonData['products'])) {
+                        error_log("Processing products: " . count($jsonData['products']));
+                        
+                        $productQuery = "INSERT INTO product_sales_summary (
+                                        summary_id, 
+                                        receta_id, 
+                                        costo_receta_id,
+                                        percentage, 
+                                        quantity, 
+                                        total
+                                    ) VALUES (
+                                        :summary_id, 
+                                        :receta_id, 
+                                        :costo_receta_id,
+                                        :percentage, 
+                                        :quantity, 
+                                        :total
+                                    )";
+                        $productStmt = $db->prepare($productQuery);
+    
+                        // Also prepare fact_sales insert
+                        $salesQuery = "INSERT INTO fact_sales (
+                                        sale_date,
+                                        receta_id,
+                                        costo_receta_id,
+                                        order_type_id,
+                                        quantity,
+                                        total_amount,
+                                        discount_amount,
+                                        tip_amount,
+                                        summary_id
+                                    ) VALUES (
+                                        :sale_date,
+                                        :receta_id,
+                                        :costo_receta_id,
+                                        :order_type_id,
+                                        :quantity,
+                                        :total_amount,
+                                        :discount_amount,
+                                        :tip_amount,
+                                        :summary_id
+                                    )";
+                        $salesStmt = $db->prepare($salesQuery);
+    
+                        foreach ($jsonData['products'] as $product) {
+                            // Insert into product_sales_summary
+                            $productStmt->bindValue(':summary_id', $summary_id);
+                            $productStmt->bindValue(':receta_id', (int)$product['recipe_id']);
+                            $productStmt->bindValue(':costo_receta_id', (int)$product['costo_receta_id']);
+                            $productStmt->bindValue(':percentage', (float)$product['percentage']);
+                            $productStmt->bindValue(':quantity', (int)$product['quantity']);
+                            $productStmt->bindValue(':total', (float)$product['total']);
+                            
+                            error_log("Inserting product summary: " . json_encode($product));
+                            $productStmt->execute();
+    
+                            // Insert into fact_sales
+                            $salesStmt->bindValue(':sale_date', $saleDate);
+                            $salesStmt->bindValue(':receta_id', (int)$product['recipe_id']);
+                            $salesStmt->bindValue(':costo_receta_id', (int)$product['costo_receta_id']);
+                            $salesStmt->bindValue(':order_type_id', 1); // Default order type
+                            $salesStmt->bindValue(':quantity', (int)$product['quantity']);
+                            $salesStmt->bindValue(':total_amount', (float)$product['total']);
+                            $salesStmt->bindValue(':discount_amount', 0);
+                            $salesStmt->bindValue(':tip_amount', 0);
+                            $salesStmt->bindValue(':summary_id', $summary_id);
+                            
+                            error_log("Inserting fact sales: " . json_encode($product));
+                            $salesStmt->execute();
+                        }
                     }
-                    $stmt->bindParam(':sale_date', $_POST['sale_date']);
-                    $stmt->bindParam(':receta_id', $_POST['receta_id']);
-                    $stmt->bindParam(':costo_receta_id', $_POST['costo_receta_id']);
-                    $stmt->bindParam(':order_type_id', $_POST['order_type_id']);
-                    $stmt->bindParam(':quantity', $_POST['quantity']);
-                    $stmt->bindParam(':total_amount', $_POST['total_amount']);
-                    $stmt->bindParam(':discount_amount', $_POST['discount_amount']);
-                    $stmt->bindParam(':tip_amount', $_POST['tip_amount']);
-                    $stmt->bindParam(':summary_id', $_POST['summary_id']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Sale added successfully!');
-                    break;
     
-                case 'ingrediente':
-                    if (!empty($_POST['ingrediente_id'])) {
-                        $query = "INSERT INTO ingrediente (ingrediente_id, nombre, descripcion, costo_unitario, unidad_id, is_active) 
-                                 VALUES (:ingrediente_id, :nombre, :descripcion, :costo_unitario, :unidad_id, :is_active)";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':ingrediente_id', $_POST['ingrediente_id']);
-                    } else {
-                        $query = "INSERT INTO ingrediente (nombre, descripcion, costo_unitario, unidad_id, is_active) 
-                                 VALUES (:nombre, :descripcion, :costo_unitario, :unidad_id, :is_active)";
-                        $stmt = $db->prepare($query);
+                    $db->commit();
+                    error_log("Transaction committed successfully");
+                    sendResponse(true, 'Daily sales summary added successfully!', ['summary_id' => $summary_id]);
+                    break;
+
+                } catch(PDOException $e) {
+                    if ($db->inTransaction()) {
+                        $db->rollBack();
+                        error_log("Transaction rolled back due to error: " . $e->getMessage());
                     }
-                    $stmt->bindParam(':nombre', $_POST['nombre']);
-                    $stmt->bindParam(':descripcion', $_POST['descripcion']);
-                    $stmt->bindParam(':costo_unitario', $_POST['costo_unitario']);
-                    $stmt->bindParam(':unidad_id', $_POST['unidad_id']);
-                    $stmt->bindParam(':is_active', $_POST['is_active']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Ingredient added successfully!');
-                    break;
-    
-                case 'receta':
-                    if (!empty($_POST['receta_id'])) {
-                        $query = "INSERT INTO receta_estandar (receta_id, nombre_receta, categoria_id, numero_preparacion, fecha_elaboracion, numero_porciones) 
-                                 VALUES (:receta_id, :nombre_receta, :categoria_id, :numero_preparacion, :fecha_elaboracion, :numero_porciones)";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':receta_id', $_POST['receta_id']);
-                    } else {
-                        $query = "INSERT INTO receta_estandar (nombre_receta, categoria_id, numero_preparacion, fecha_elaboracion, numero_porciones) 
-                                 VALUES (:nombre_receta, :categoria_id, :numero_preparacion, :fecha_elaboracion, :numero_porciones)";
-                        $stmt = $db->prepare($query);
+                    sendResponse(false, 'Database error: ' . $e->getMessage());
+                } catch(Exception $e) {
+                    if ($db->inTransaction()) {
+                        $db->rollBack();
+                        error_log("Transaction rolled back due to general error: " . $e->getMessage());
                     }
-                    $stmt->bindParam(':nombre_receta', $_POST['nombre_receta']);
-                    $stmt->bindParam(':categoria_id', $_POST['categoria_id']);
-                    $stmt->bindParam(':numero_preparacion', $_POST['numero_preparacion']);
-                    $stmt->bindParam(':fecha_elaboracion', $_POST['fecha_elaboracion']);
-                    $stmt->bindParam(':numero_porciones', $_POST['numero_porciones']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Recipe added successfully!');
-                    break;
-    
-                case 'receta_ingredientes':
-                    if (!empty($_POST['receta_ingredientes_id'])) {
-                        $query = "INSERT INTO receta_ingredientes (receta_ingredientes_id, receta_id, ingrediente_id, cantidad, costo_total) 
-                                 VALUES (:receta_ingredientes_id, :receta_id, :ingrediente_id, :cantidad, :costo_total)";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':receta_ingredientes_id', $_POST['receta_ingredientes_id']);
-                    } else {
-                        $query = "INSERT INTO receta_ingredientes (receta_id, ingrediente_id, cantidad, costo_total) 
-                                 VALUES (:receta_id, :ingrediente_id, :cantidad, :costo_total)";
-                        $stmt = $db->prepare($query);
-                    }
-                    $stmt->bindParam(':receta_id', $_POST['receta_id']);
-                    $stmt->bindParam(':ingrediente_id', $_POST['ingrediente_id']);
-                    $stmt->bindParam(':cantidad', $_POST['cantidad']);
-                    $stmt->bindParam(':costo_total', $_POST['costo_total']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Recipe ingredients added successfully!');
-                    break;
-    
-                case 'unidad_medida':
-                    if (!empty($_POST['unidad_id'])) {
-                        $query = "INSERT INTO unidad_medida (unidad_id, nombre) VALUES (:unidad_id, :nombre)";
-                        $stmt = $db->prepare($query);
-                        $stmt->bindParam(':unidad_id', $_POST['unidad_id']);
-                    } else {
-                        $query = "INSERT INTO unidad_medida (nombre) VALUES (:nombre)";
-                        $stmt = $db->prepare($query);
-                    }
-                    $stmt->bindParam(':nombre', $_POST['nombre']);
-                    $stmt->execute();
-                    $db->commit();
-                    sendResponse(true, 'Unit of measurement added successfully!');
-                    break;
-    
-                default:
-                    sendResponse(true, 'Processing Form.');
+                    sendResponse(false, 'Error: ' . $e->getMessage());
+                }
             }
-        } catch(PDOException $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            sendResponse(false, 'Database error: ' . $e->getMessage());
-        } catch(Exception $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            sendResponse(false, 'Error: ' . $e->getMessage());
-        }
-    }
-    ?>
+            ?>

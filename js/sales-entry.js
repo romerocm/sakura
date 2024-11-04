@@ -205,16 +205,7 @@ $(document).ready(function () {
     $("#sale_date").val(currentDate.toISOString().split("T")[0]);
   });
 
-  // Auto-calculate percentages
-  $(document).on("input", ".category-total, #total_sales", function () {
-    updateTotals();
-  });
-
-  $(document).on("input", ".product-total, #total_sales", function () {
-    updateTotals();
-  });
-
-  // Update calculations when inputs change
+  // Input event handlers
   $("#total_sales, #orders_count").on("input", updateAverageOrder);
   $(document).on(
     "input",
@@ -227,32 +218,13 @@ $(document).ready(function () {
     e.preventDefault();
 
     try {
-      // Get all recipe costs first
-      const recipeCosts = {};
-      const recipePromises = [];
-
-      $("#productsTable tbody tr.product-row").each(function () {
-        const recipeId = $(this).find(".recipe-select").val();
-        if (recipeId) {
-          const promise = $.get("includes/get_recipe_cost_id.php", {
-            recipe_id: recipeId,
-          }).then((response) => {
-            recipeCosts[recipeId] = response.costo_receta_id;
-          });
-          recipePromises.push(promise);
-        }
-      });
-
-      // Wait for all recipe costs to be fetched
-      await Promise.all(recipePromises);
-
       const formData = {
         form_type: "daily_sales_summary",
         sale_date: $("#sale_date").val(),
-        total_sales: parseFloat($("#total_sales").val()) || 0,
-        net_sales: parseFloat($("#net_sales").val()) || 0,
-        tips: parseFloat($("#tips").val()) || 0,
-        customer_count: parseInt($("#customer_count").val()) || 0,
+        total_sales: Number($("#total_sales").val() || 0).toFixed(2),
+        net_sales: Number($("#net_sales").val() || 0).toFixed(2),
+        tips: Number($("#tips").val() || 0).toFixed(2),
+        customer_count: parseInt($("#customer_count").val() || 0),
         categories: [],
         products: [],
       };
@@ -262,31 +234,50 @@ $(document).ready(function () {
         const categoryId = $(this).find(".category-select").val();
         if (categoryId) {
           formData.categories.push({
-            category_id: categoryId,
-            percentage:
-              parseFloat($(this).find(".category-percentage").val()) || 0,
-            quantity: parseInt($(this).find(".category-quantity").val()) || 0,
-            total: parseFloat($(this).find(".category-total").val()) || 0,
+            category_id: parseInt(categoryId),
+            percentage: Number(
+              $(this).find(".category-percentage").val() || 0
+            ).toFixed(2),
+            quantity: parseInt($(this).find(".category-quantity").val() || 0),
+            total: Number($(this).find(".category-total").val() || 0).toFixed(
+              2
+            ),
           });
         }
       });
 
-      // Collect products data
-      $("#productsTable tbody tr.product-row").each(function () {
-        const recipeId = $(this).find(".recipe-select").val();
-        if (recipeId && recipeCosts[recipeId]) {
-          formData.products.push({
-            recipe_id: recipeId,
-            costo_receta_id: recipeCosts[recipeId],
-            percentage:
-              parseFloat($(this).find(".product-percentage").val()) || 0,
-            quantity: parseInt($(this).find(".product-quantity").val()) || 0,
-            total: parseFloat($(this).find(".product-total").val()) || 0,
-          });
-        }
-      });
+      // Get all recipe costs first
+      const productPromises = $("#productsTable tbody tr.product-row")
+        .map(function () {
+          const recipeId = $(this).find(".recipe-select").val();
+          if (recipeId) {
+            return $.get("includes/get_recipe_cost_id.php", {
+              recipe_id: recipeId,
+            }).then((response) => ({
+              recipe_id: parseInt(recipeId),
+              costo_receta_id: parseInt(response.costo_receta_id),
+              percentage: Number(
+                $(this).find(".product-percentage").val() || 0
+              ).toFixed(2),
+              quantity: parseInt($(this).find(".product-quantity").val() || 0),
+              total: Number($(this).find(".product-total").val() || 0).toFixed(
+                2
+              ),
+            }));
+          }
+          return null;
+        })
+        .get();
 
-      // Submit the form data
+      // Wait for all recipe costs to be fetched
+      const products = await Promise.all(
+        productPromises.filter((p) => p !== null)
+      );
+      formData.products = products;
+
+      console.log("Submitting form data:", formData);
+
+      // Submit the data
       const response = await $.ajax({
         url: "process.php",
         type: "POST",
