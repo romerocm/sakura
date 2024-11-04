@@ -12,6 +12,10 @@ function loadSelectOptions() {
       const element = $(selector);
       if (element.length) {
         element.html(data);
+        element.select2({
+          placeholder: "Search for a recipe",
+          allowClear: true
+        });
       }
     });
   }).fail(function (error) {
@@ -21,11 +25,21 @@ function loadSelectOptions() {
 
   // Load other select options
   $.get("includes/get_categories.php", function (data) {
-    $("#categoria_select").html(data);
+    const categorySelect = $("#categoria_select");
+    categorySelect.html(data);
+    categorySelect.select2({
+      placeholder: "Search for a category",
+      allowClear: true
+    });
   });
 
   $.get("includes/get_units.php", function (data) {
-    $("#unidad_id").html(data);
+    const unitSelect = $("#unidad_id");
+    unitSelect.html(data);
+    unitSelect.select2({
+      placeholder: "Search for a unit",
+      allowClear: true
+    });
   });
 
   // Load ingredients into the select element only once and initialize Select2
@@ -42,11 +56,21 @@ function loadSelectOptions() {
   }
 
   $.get("includes/get_order_types.php", function (data) {
-    $("#order_type_id").html(data);
+    const orderTypeSelect = $("#order_type_id");
+    orderTypeSelect.html(data);
+    orderTypeSelect.select2({
+      placeholder: "Search for an order type",
+      allowClear: true
+    });
   });
 
   $.get("includes/get_recipe_costs.php", function (data) {
-    $("#costo_receta_id").html(data);
+    const recipeCostSelect = $("#costo_receta_id");
+    recipeCostSelect.html(data);
+    recipeCostSelect.select2({
+      placeholder: "Search for a recipe cost",
+      allowClear: true
+    });
   });
 }
 
