@@ -197,6 +197,15 @@ function checkAllDependencies() {
 
 // Initialize when document is ready
 $(document).ready(function () {
+    // Initialize Select2 for dropdowns
+    $('.category-select').select2({
+        placeholder: "Search for a category",
+        allowClear: true
+    });
+    $('.recipe-select').select2({
+        placeholder: "Search for a product",
+        allowClear: true
+    });
   // Initial load of select options
   loadSelectOptions();
 

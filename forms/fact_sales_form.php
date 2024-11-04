@@ -230,16 +230,4 @@
             </div>
         </div>
     </form>
-    <script>
-        $(document).ready(function() {
-            $('.category-select').select2({
-                placeholder: "Search for a category",
-                allowClear: true
-            });
-            $('.recipe-select').select2({
-                placeholder: "Search for a product",
-                allowClear: true
-            });
-        });
-    </script>
 </div>
