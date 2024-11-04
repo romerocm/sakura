@@ -230,4 +230,8 @@
             </div>
         </div>
     </form>
+    <button type="button" class="btn btn-info w-100" id="openAIChatbot">
+        <i class="fas fa-robot"></i> Open AI Chatbot
+    </button>
+<script src="js/chatbot.js"></script>
 </div>
