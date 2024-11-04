@@ -126,7 +126,7 @@ $(document).ready(function () {
     $("#productQuantityTotal").text(productQuantityTotal);
     $("#productTotalAmount").text(productAmountTotal.toFixed(2));
 
-    // Update visual feedback for totals
+    // Update visual feedback
     updateTotalsFeedback();
   }
 
@@ -205,6 +205,75 @@ $(document).ready(function () {
     $("#sale_date").val(currentDate.toISOString().split("T")[0]);
   });
 
+  // Form submission handler
+  $("#dailySalesForm").on("submit", function (e) {
+    e.preventDefault();
+
+    const categoryTotal = parseFloat($("#categoryTotalAmount").text()) || 0;
+
+    const formData = {
+      form_type: "daily_sales_summary",
+      sale_date: $("#sale_date").val(),
+      total_sales: categoryTotal.toFixed(2),
+      net_sales: categoryTotal.toFixed(2),
+      tips: Number($("#tips").val() || 0).toFixed(2),
+      customer_count: parseInt($("#customer_count").val() || 0),
+      categories: [],
+      products: [],
+    };
+
+    // Collect categories data
+    $("#categoriesTable tbody tr.category-row").each(function () {
+      const categoryId = $(this).find(".category-select").val();
+      if (categoryId) {
+        formData.categories.push({
+          category_id: parseInt(categoryId),
+          percentage: Number(
+            $(this).find(".category-percentage").val() || 0
+          ).toFixed(2),
+          quantity: parseInt($(this).find(".category-quantity").val() || 0),
+          total: Number($(this).find(".category-total").val() || 0).toFixed(2),
+        });
+      }
+    });
+
+    // Collect products data
+    $("#productsTable tbody tr.product-row").each(function () {
+      const recipeId = $(this).find(".recipe-select").val();
+      if (recipeId) {
+        formData.products.push({
+          recipe_id: parseInt(recipeId),
+          percentage: Number(
+            $(this).find(".product-percentage").val() || 0
+          ).toFixed(2),
+          quantity: parseInt($(this).find(".product-quantity").val() || 0),
+          total: Number($(this).find(".product-total").val() || 0).toFixed(2),
+        });
+      }
+    });
+
+    // Submit form data
+    $.ajax({
+      url: "process.php",
+      type: "POST",
+      data: JSON.stringify(formData),
+      contentType: "application/json",
+      success: function (response) {
+        if (response.success) {
+          showToast("Daily sales summary saved successfully!", "success");
+          $("#dailySalesForm")[0].reset();
+          initializeForm();
+        } else {
+          showToast(response.message || "Error saving sales summary", "danger");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("Form submission error:", error);
+        showToast("Error saving sales summary: " + error, "danger");
+      },
+    });
+  });
+
   // Input event handlers
   $("#total_sales, #orders_count").on("input", updateAverageOrder);
   $(document).on(
@@ -213,91 +282,18 @@ $(document).ready(function () {
     updateTotals
   );
 
-  // Form submission handler
-  $("#dailySalesForm").on("submit", async function (e) {
-    e.preventDefault();
+  // Verify Totals button handler
+  $("#verifyTotals").on("click", function () {
+    const categoryTotal = parseFloat($("#categoryTotalAmount").text()) || 0;
+    const productTotal = parseFloat($("#productTotalAmount").text()) || 0;
 
-    try {
-      const formData = {
-        form_type: "daily_sales_summary",
-        sale_date: $("#sale_date").val(),
-        total_sales: Number($("#total_sales").val() || 0).toFixed(2),
-        net_sales: Number($("#net_sales").val() || 0).toFixed(2),
-        tips: Number($("#tips").val() || 0).toFixed(2),
-        customer_count: parseInt($("#customer_count").val() || 0),
-        categories: [],
-        products: [],
-      };
-
-      // Collect categories data
-      $("#categoriesTable tbody tr.category-row").each(function () {
-        const categoryId = $(this).find(".category-select").val();
-        if (categoryId) {
-          formData.categories.push({
-            category_id: parseInt(categoryId),
-            percentage: Number(
-              $(this).find(".category-percentage").val() || 0
-            ).toFixed(2),
-            quantity: parseInt($(this).find(".category-quantity").val() || 0),
-            total: Number($(this).find(".category-total").val() || 0).toFixed(
-              2
-            ),
-          });
-        }
-      });
-
-      // Get all recipe costs first
-      const productPromises = $("#productsTable tbody tr.product-row")
-        .map(function () {
-          const recipeId = $(this).find(".recipe-select").val();
-          if (recipeId) {
-            return $.get("includes/get_recipe_cost_id.php", {
-              recipe_id: recipeId,
-            }).then((response) => ({
-              recipe_id: parseInt(recipeId),
-              costo_receta_id: parseInt(response.costo_receta_id),
-              percentage: Number(
-                $(this).find(".product-percentage").val() || 0
-              ).toFixed(2),
-              quantity: parseInt($(this).find(".product-quantity").val() || 0),
-              total: Number($(this).find(".product-total").val() || 0).toFixed(
-                2
-              ),
-            }));
-          }
-          return null;
-        })
-        .get();
-
-      // Wait for all recipe costs to be fetched
-      const products = await Promise.all(
-        productPromises.filter((p) => p !== null)
-      );
-      formData.products = products;
-
-      console.log("Submitting form data:", formData);
-
-      // Submit the data
-      const response = await $.ajax({
-        url: "process.php",
-        type: "POST",
-        data: JSON.stringify(formData),
-        contentType: "application/json",
-      });
-
-      if (response.success) {
-        showToast("Daily sales summary saved successfully!", "success");
-        $("#dailySalesForm")[0].reset();
-        initializeForm();
-      } else {
-        showToast(response.message || "Error saving sales summary", "danger");
-      }
-    } catch (error) {
+    if (Math.abs(categoryTotal - productTotal) <= 0.01) {
+      showToast("Totals match correctly!", "success");
+    } else {
       showToast(
-        "Error processing form: " + (error.message || "Unknown error"),
-        "danger"
+        "Warning: Category total and Product total do not match",
+        "warning"
       );
-      console.error("Form submission error:", error);
     }
   });
 
