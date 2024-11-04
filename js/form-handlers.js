@@ -162,32 +162,10 @@ function checkAllDependencies() {
   }
 }
 
-function loadCategoryOptions() {
-  $.get("includes/get_categories.php", function (data) {
-    $(".category-select").html(data);
-  }).fail(function (error) {
-    console.error("Error loading categories:", error);
-    showToast("Error loading categories", "danger");
-  });
-}
-
-function loadProductOptions() {
-  $.get("includes/get_recipes.php", function (data) {
-    $(".recipe-select").html(data);
-  }).fail(function (error) {
-    console.error("Error loading products:", error);
-    showToast("Error loading products", "danger");
-  });
-}
-
 // Initialize when document is ready
 $(document).ready(function () {
   // Initial load of select options
   loadSelectOptions();
-
-  // Load options on dropdown click
-  $(document).on("click", ".category-select", loadCategoryOptions);
-  $(document).on("click", ".recipe-select", loadProductOptions);
 
   // Handle manual ID toggles
   document
