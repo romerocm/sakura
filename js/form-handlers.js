@@ -209,6 +209,12 @@ $(document).ready(function () {
         allowClear: true
     });
 
+    // Initialize Select2 for any other select elements if needed
+    $('select').select2({
+        placeholder: "Select an option",
+        allowClear: true
+    });
+
     // Additional initialization code if needed
   // Initial load of select options
   loadSelectOptions();
