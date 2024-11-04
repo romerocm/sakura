@@ -87,7 +87,11 @@ $(document).ready(function () {
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          prompt: `Analyze the following Excel data and return a JSON format specifically for the fields in the fact_sales_form.php: ${excelData}`,
+          prompt: `Convert the following sales report data into JSON format for the fields in the fact_sales_form.php. The data is structured as follows: 
+          "Reporte de ventas - 1/10/2024
+          Venta total: $52.94, Venta neta: $52.94, Propinas: $5.63, Descuentos: $3.26, Devoluciones: $0.00, Cantidad de clientes: 4, Promedio por clientes: $13.23, Ordenes: 3, Orden promedio: $17.65
+          Categorías más vendidas: Bowls 53% 2 $27.90, Rolls 19% 1 $10.05, Sashimi 18% 1 $9.79, Bebidas 10% 2 $5.21
+          Productos más vendidos: Tuna Steak Poke 26% 1 $13.95, Poke de Salmon 26% 1 $13.95, Sujin Roll 19% 1 $10.05, Yakisesamo 18% 1 $9.79, Michelob Ultra 6% 1 $3.25, Coca-Cola Zero 4% 1 $1.96"`,
           max_tokens: 150,
         }),
       });
