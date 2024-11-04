@@ -239,7 +239,16 @@ $(document).ready(function () {
           $("#addCategory").click();
           row = $("#categoriesTable tbody tr").last();
         }
-        row.find(".category-select").val(category.Categoría);
+        let categoryValue = category.Categoría;
+        if (categoryValue.toLowerCase().includes("drink")) {
+          categoryValue = "BEBIDAS";
+        } else if (
+          categoryValue.toLowerCase().includes("sashimi") ||
+          categoryValue.toLowerCase().includes("nigiri")
+        ) {
+          categoryValue = "SUSHI";
+        }
+        row.find(".category-select").val(categoryValue);
         row.find(".category-percentage").val(category.Porcentaje.replace('%', ''));
         row.find(".category-quantity").val(category.Cantidad);
         row.find(".category-total").val(category.Total.replace('$', ''));
