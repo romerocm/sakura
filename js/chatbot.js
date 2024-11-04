@@ -215,7 +215,11 @@ $(document).ready(function () {
     // Populate form fields with JSON data
     if (jsonData["Reporte de ventas"]) {
       const report = jsonData["Reporte de ventas"];
-      if (report.Fecha) $("#sale_date").val(report.Fecha);
+      if (report.Fecha) {
+        const dateParts = report.Fecha.split('/');
+        const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+        $("#sale_date").val(formattedDate);
+      }
       if (report["Venta total"]) $("#total_sales").val(report["Venta total"].replace('$', ''));
       if (report["Venta neta"]) $("#net_sales").val(report["Venta neta"].replace('$', ''));
       if (report.Propinas) $("#tips").val(report.Propinas.replace('$', ''));
