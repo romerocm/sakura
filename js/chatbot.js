@@ -216,10 +216,10 @@ $(document).ready(function () {
 
   function populateFormWithJsonData(jsonData) {
     // Populate form fields with JSON data
-    if (jsonData["Reporte de ventas"]) {
-      const report = jsonData["Reporte de ventas"];
-      if (report.Fecha) {
-        const dateParts = report.Fecha.split('/');
+    if (jsonData["Daily Summary"]) {
+      const report = jsonData["Daily Summary"];
+      if (report.fecha) {
+        const dateParts = report.fecha.split('/');
         const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
         $("#sale_date").val(formattedDate);
       }
@@ -232,22 +232,14 @@ $(document).ready(function () {
     }
 
     // Populate categories
-    if (jsonData["Categorías más vendidas"]) {
-      jsonData["Categorías más vendidas"].forEach((category, index) => {
+    if (jsonData["Categorías Vendidas"]) {
+      jsonData["Categorías Vendidas"].forEach((category, index) => {
         let row = $("#categoriesTable tbody tr").eq(index);
         if (row.length === 0) {
           $("#addCategory").click();
           row = $("#categoriesTable tbody tr").last();
         }
-        let categoryValue = category.Categoría;
-        if (categoryValue.toLowerCase().includes("drink")) {
-          categoryValue = "BEBIDAS";
-        } else if (
-          categoryValue.toLowerCase().includes("sashimi") ||
-          categoryValue.toLowerCase().includes("nigiri")
-        ) {
-          categoryValue = "SUSHI";
-        }
+        let categoryValue = category.Categoría.toUpperCase();
         row.find(".category-select").val(categoryValue);
         row.find(".category-percentage").val(category.Porcentaje.replace('%', ''));
         row.find(".category-quantity").val(category.Cantidad);
@@ -256,8 +248,8 @@ $(document).ready(function () {
     }
 
     // Populate products
-    if (jsonData["Productos más vendidos"]) {
-      jsonData["Productos más vendidos"].forEach((product, index) => {
+    if (jsonData["Productos Vendidos"]) {
+      jsonData["Productos Vendidos"].forEach((product, index) => {
         let row = $("#productsTable tbody tr").eq(index);
         if (row.length === 0) {
           $("#addProduct").click();
