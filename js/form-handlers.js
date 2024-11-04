@@ -1,18 +1,14 @@
 // Form handling logic
 function loadSelectOptions() {
   // Load recipes into all recipe select elements
-  const recipeSelectors = [
-    "#receta_select", // costos_receta_form
-    "#receta_id", // fact_sales_form
-    'select[name="receta_id"]', // any other form using recipe_id
-  ];
-
   $.get("includes/get_recipes.php", function (data) {
-    recipeSelectors.forEach((selector) => {
-      const element = $(selector);
-      if (element.length) {
-        element.html(data);
+    $(".recipe-select").each(function () {
+      const currentValue = $(this).val();
+      $(this).html(data);
+      if (currentValue) {
+        $(this).val(currentValue);
       }
+      $(this).trigger('change'); // Ensure Select2 updates
     });
   }).fail(function (error) {
     console.error("Error loading recipes:", error);
