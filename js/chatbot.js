@@ -1,21 +1,25 @@
 $(document).ready(function () {
   // OpenAI Chatbot logic
   $("#openAIChatbot").on("click", function () {
-    const apiKey = prompt("Please enter your OpenAI API key:");
-    if (!apiKey) {
-      alert("API key is required to use the chatbot.");
-      return;
-    }
+    $("#chatWindow").toggle();
+  });
 
-    // Simulate Excel data input
-    const excelData = prompt("Paste your Excel data here:");
-    if (!excelData) {
-      alert("Excel data is required.");
-      return;
-    }
+  $(document).on("click", ".close-chat", function () {
+    $("#chatWindow").hide();
+  });
 
-    // Process data with OpenAI
-    processDataWithOpenAI(apiKey, excelData);
+  $("#sendChat").on("click", function () {
+    const message = $("#chatInput").val();
+    if (message.trim() === "") return;
+
+    $(".chat-messages").append(`<div class="chat-message user-message">${message}</div>`);
+    $("#chatInput").val("");
+
+    // Here you would send the message to OpenAI and handle the response
+    // For now, we'll simulate a response
+    setTimeout(() => {
+      $(".chat-messages").append(`<div class="chat-message ai-message">This is a simulated response.</div>`);
+    }, 1000);
   });
 
   async function processDataWithOpenAI(apiKey, excelData) {

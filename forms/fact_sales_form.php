@@ -233,5 +233,21 @@
     <button type="button" class="btn btn-info w-100" id="openAIChatbot">
         <i class="fas fa-robot"></i> Open AI Chatbot
     </button>
-<script src="js/chatbot.js"></script>
+
+    <!-- Chat Window -->
+    <div id="chatWindow" class="chat-window" style="display: none;">
+        <div class="chat-header">
+            <h5>AI Chatbot</h5>
+            <button type="button" class="close-chat">&times;</button>
+        </div>
+        <div class="chat-body">
+            <div class="chat-messages"></div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chatInput" placeholder="Type a message..." />
+            <button type="button" id="sendChat">Send</button>
+        </div>
+    </div>
+
+    <script src="js/chatbot.js"></script>
 </div>
