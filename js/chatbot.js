@@ -47,7 +47,7 @@ $(document).ready(function () {
           { role: "system", content: "Please convert the following sales report data into JSON format. Only return the JSON object, without any additional text or explanation." },
           { role: "user", content: message }
         ],
-        max_tokens: 300,
+        max_tokens: 500,
       }),
     })
     .then(response => response.json())
@@ -56,13 +56,20 @@ $(document).ready(function () {
         const aiMessage = data.choices[0].message.content.trim();
         $(".chat-messages").append(`<div class="chat-message ai-message">${aiMessage}</div>`);
         try {
-          const jsonData = JSON.parse(aiMessage);
-          if (jsonData && typeof jsonData === 'object') {
-            populateFormWithJsonData(jsonData);
-            updateFormFields(jsonData);
+          // Ensure the response ends with a closing brace
+          if (aiMessage.trim().endsWith('}')) {
+            const jsonData = JSON.parse(aiMessage);
+            if (jsonData && typeof jsonData === 'object') {
+              populateFormWithJsonData(jsonData);
+              updateFormFields(jsonData);
+            } else {
+              console.error("AI response is not in JSON format:", aiMessage);
+              $(".chat-messages").append(`<div class="chat-message ai-message">AI response is not in JSON format. Please ensure the response is in JSON format.</div>`);
+            }
           } else {
-            console.error("AI response is not in JSON format:", aiMessage);
-            $(".chat-messages").append(`<div class="chat-message ai-message">AI response is not in JSON format. Please ensure the response is in JSON format.</div>`);
+            console.error("AI response is incomplete:", aiMessage);
+            $(".chat-messages").append(`<div class="chat-message ai-message">AI response is incomplete. Please ensure the response is complete and in JSON format.</div>`);
+            $(".chat-messages").append(`<div class="chat-message ai-message">Raw AI response: ${aiMessage}</div>`);
           }
         } catch (e) {
           console.error("Error parsing AI response:", e);
