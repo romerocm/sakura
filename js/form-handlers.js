@@ -28,9 +28,14 @@ function loadSelectOptions() {
     $("#unidad_id").html(data);
   });
 
-  $.get("includes/get_ingredients.php", function (data) {
-    $("#ingrediente_select").html(data);
-  });
+  // Load ingredients into the select element only once
+  const ingredientSelect = $("#ingrediente_select");
+  if (!ingredientSelect.data("loaded")) {
+    $.get("includes/get_ingredients.php", function (data) {
+      ingredientSelect.html(data);
+      ingredientSelect.data("loaded", true);
+    });
+  }
 
   $.get("includes/get_order_types.php", function (data) {
     $("#order_type_id").html(data);
