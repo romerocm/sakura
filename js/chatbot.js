@@ -229,6 +229,7 @@ $(document).ready(function () {
       if (resumen["CantidadDeClientes"]) $("#customer_count").val(resumen["CantidadDeClientes"]);
       if (resumen["Ordenes"]) $("#orders_count").val(resumen["Ordenes"]);
     }
+    updateAverageOrder(); // Ensure average order is calculated by the form
 
     // Populate categories
     if (jsonData["CategoriasMasVendidas"]) {
