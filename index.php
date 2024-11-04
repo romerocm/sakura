@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <!-- Custom Styles -->
     <link href="css/main.css" rel="stylesheet">
-    <link href="css/forms.css" rel="stylesheet">
+    <link href="css/forms.css?v=1.0" rel="stylesheet">
     <link href="css/sales.css" rel="stylesheet">
 </head>
 <body>
