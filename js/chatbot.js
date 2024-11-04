@@ -75,6 +75,8 @@ $(document).ready(function () {
               if (jsonData && typeof jsonData === "object") {
                 populateFormWithJsonData(jsonData);
                 updateTotals();
+                // Trigger change events to ensure dynamic updates
+                $("#total_sales, #net_sales, #tips, #customer_count, #orders_count").trigger("input");
               } else {
                 console.error("AI response is not in JSON format:", aiMessage);
                 $(".chat-messages").append(
