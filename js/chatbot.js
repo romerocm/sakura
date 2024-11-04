@@ -233,12 +233,18 @@ $(document).ready(function () {
 
     // Populate categories
     if (jsonData["Categorías más vendidas"]) {
-      jsonData["Categorías más vendidas"].forEach((category, index) => {
-        let row = $("#categoriesTable tbody tr").eq(index);
+      jsonData["Categorías más vendidas"].forEach((category) => {
+        let row = $("#categoriesTable tbody tr.category-row").filter(
+          function () {
+            return $(this).find(".category-select").val() === category.Categoría;
+          }
+        );
+
         if (row.length === 0) {
           $("#addCategory").click();
-          row = $("#categoriesTable tbody tr").last();
+          row = $("#categoriesTable tbody tr.category-row").last();
         }
+
         row.find(".category-select").val(category.Categoría);
         row.find(".category-percentage").val(category.Porcentaje.replace('%', ''));
         row.find(".category-quantity").val(category.Cantidad);
@@ -248,12 +254,16 @@ $(document).ready(function () {
 
     // Populate products
     if (jsonData["Productos más vendidos"]) {
-      jsonData["Productos más vendidos"].forEach((product, index) => {
-        let row = $("#productsTable tbody tr").eq(index);
+      jsonData["Productos más vendidos"].forEach((product) => {
+        let row = $("#productsTable tbody tr.product-row").filter(function () {
+          return $(this).find(".recipe-select").val() === product.Producto;
+        });
+
         if (row.length === 0) {
           $("#addProduct").click();
-          row = $("#productsTable tbody tr").last();
+          row = $("#productsTable tbody tr.product-row").last();
         }
+
         row.find(".recipe-select").val(product.Producto);
         row.find(".product-percentage").val(product.Porcentaje.replace('%', ''));
         row.find(".product-quantity").val(product.Cantidad);
