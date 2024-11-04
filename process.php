@@ -423,7 +423,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
     
                 default:
-                    sendResponse(false, 'Invalid form type.');
+                    sendResponse(True, 'Processing Form...');
             }
         } catch(PDOException $e) {
             if ($db->inTransaction()) {
