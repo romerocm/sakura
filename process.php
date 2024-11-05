@@ -114,6 +114,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $productStmt = $db->prepare($productQuery);
 
                     foreach ($jsonData['products'] as $product) {
+                        // Log the product data for debugging
+                        error_log("Processing product: " . json_encode($product));
+
+                        // Check if costo_receta_id is null
+                        $costoRecetaIdQuery = "SELECT costo_receta_id 
+                                               FROM costos_receta 
+                                               WHERE receta_id = :receta_id_for_cost
+                                               ORDER BY costo_receta_id DESC 
+                                               LIMIT 1";
+                        $costoRecetaStmt = $db->prepare($costoRecetaIdQuery);
+                        $costoRecetaStmt->bindParam(':receta_id_for_cost', $product['recipe_id']);
+                        $costoRecetaStmt->execute();
+                        $costoRecetaId = $costoRecetaStmt->fetchColumn();
+
+                        if ($costoRecetaId === false) {
+                            error_log("No costo_receta_id found for recipe_id: " . $product['recipe_id']);
+                            sendResponse(false, 'No costo_receta_id found for recipe_id: ' . $product['recipe_id']);
+                        }
                         $productStmt->bindParam(':summary_id', $summary_id);
                         $productStmt->bindParam(':receta_id', $product['recipe_id']);
                         $productStmt->bindParam(':receta_id_for_cost', $product['recipe_id']); // Bind recipe_id again for subquery
