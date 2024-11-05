@@ -224,9 +224,9 @@ $(document).ready(function () {
       $("#customer_count").val(formData.customer_count);
       $("#orders_count").val(formData.orders_count);
 
-      // Clear existing rows except the first one to keep the template
-      $("#categoriesTable tbody").find("tr:gt(0)").remove();
-      $("#productsTable tbody").find("tr:gt(0)").remove();
+      // Clear existing rows
+      $("#categoriesTable tbody").empty();
+      $("#productsTable tbody").empty();
 
       // Populate categories
       formData.categories.forEach((category) => {
@@ -247,6 +247,10 @@ $(document).ready(function () {
         template.find(".product-total").val(product.total);
         $("#productsTable tbody").append(template);
       });
+
+      // Add an empty row for new entries
+      $("#addCategory").click();
+      $("#addProduct").click();
 
       updateRowNumbers();
       updateTotals();
