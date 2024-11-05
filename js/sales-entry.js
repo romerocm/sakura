@@ -177,17 +177,83 @@ $(document).ready(function () {
     }
   });
 
-  // Previous/Next Day Navigation
-  $("#prevDay").on("click", function () {
-    const currentDate = new Date($("#sale_date").val());
-    currentDate.setDate(currentDate.getDate() - 1);
-    $("#sale_date").val(currentDate.toISOString().split("T")[0]);
+  // Save current form data to local storage
+  $("#saveData").on("click", function () {
+    const formData = {
+      sale_date: $("#sale_date").val(),
+      total_sales: $("#total_sales").val(),
+      net_sales: $("#net_sales").val(),
+      tips: $("#tips").val(),
+      customer_count: $("#customer_count").val(),
+      orders_count: $("#orders_count").val(),
+      categories: [],
+      products: []
+    };
+
+    $("#categoriesTable tbody tr.category-row").each(function () {
+      formData.categories.push({
+        category_id: $(this).find(".category-select").val(),
+        percentage: $(this).find(".category-percentage").val(),
+        quantity: $(this).find(".category-quantity").val(),
+        total: $(this).find(".category-total").val()
+      });
+    });
+
+    $("#productsTable tbody tr.product-row").each(function () {
+      formData.products.push({
+        recipe_id: $(this).find(".recipe-select").val(),
+        percentage: $(this).find(".product-percentage").val(),
+        quantity: $(this).find(".product-quantity").val(),
+        total: $(this).find(".product-total").val()
+      });
+    });
+
+    localStorage.setItem("salesFormData", JSON.stringify(formData));
+    showToast("Data saved successfully!", "success");
   });
 
-  $("#nextDay").on("click", function () {
-    const currentDate = new Date($("#sale_date").val());
-    currentDate.setDate(currentDate.getDate() + 1);
-    $("#sale_date").val(currentDate.toISOString().split("T")[0]);
+  // Load saved form data from local storage
+  $("#loadData").on("click", function () {
+    const savedData = localStorage.getItem("salesFormData");
+    if (savedData) {
+      const formData = JSON.parse(savedData);
+      $("#sale_date").val(formData.sale_date);
+      $("#total_sales").val(formData.total_sales);
+      $("#net_sales").val(formData.net_sales);
+      $("#tips").val(formData.tips);
+      $("#customer_count").val(formData.customer_count);
+      $("#orders_count").val(formData.orders_count);
+
+      // Clear existing rows
+      $("#categoriesTable tbody").empty();
+      $("#productsTable tbody").empty();
+
+      // Populate categories
+      formData.categories.forEach((category) => {
+        const template = $("#categoriesTable tbody tr.category-row:first").clone(true);
+        template.find(".category-select").val(category.category_id);
+        template.find(".category-percentage").val(category.percentage);
+        template.find(".category-quantity").val(category.quantity);
+        template.find(".category-total").val(category.total);
+        $("#categoriesTable tbody").append(template);
+      });
+
+      // Populate products
+      formData.products.forEach((product) => {
+        const template = $("#productsTable tbody tr.product-row:first").clone(true);
+        template.find(".recipe-select").val(product.recipe_id);
+        template.find(".product-percentage").val(product.percentage);
+        template.find(".product-quantity").val(product.quantity);
+        template.find(".product-total").val(product.total);
+        $("#productsTable tbody").append(template);
+      });
+
+      updateRowNumbers();
+      updateTotals();
+      showToast("Data loaded successfully!", "success");
+    } else {
+      showToast("No saved data found", "warning");
+    }
   });
 
   // Input event handlers

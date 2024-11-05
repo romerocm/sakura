@@ -219,13 +219,13 @@
                 </button>
             </div>
             <div class="col-md-4">
-                <button type="button" class="btn btn-secondary w-100" id="copyPrevious">
-                    <i class="fas fa-copy"></i> Copy Previous Day Data
+                <button type="button" class="btn btn-secondary w-100" id="saveData">
+                    <i class="fas fa-save"></i> Save Current Data
                 </button>
             </div>
             <div class="col-md-4">
-                <button type="button" class="btn btn-success w-100" id="verifyTotals">
-                    <i class="fas fa-check-circle"></i> Verify Totals
+                <button type="button" class="btn btn-success w-100" id="loadData">
+                    <i class="fas fa-upload"></i> Load Saved Data
                 </button>
             </div>
         </div>
