@@ -229,9 +229,9 @@ $(document).ready(function () {
 
       // Use a timeout to ensure options are loaded before setting values
       setTimeout(() => {
-        // Clear existing rows
-        $("#categoriesTable tbody").empty();
-        $("#productsTable tbody").empty();
+        // Clear existing rows but keep the template row
+        $("#categoriesTable tbody").find("tr:gt(0)").remove();
+        $("#productsTable tbody").find("tr:gt(0)").remove();
 
         // Populate categories
         formData.categories.forEach((category) => {
