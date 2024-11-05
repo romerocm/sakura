@@ -224,37 +224,43 @@ $(document).ready(function () {
       $("#customer_count").val(formData.customer_count);
       $("#orders_count").val(formData.orders_count);
 
-      // Clear existing rows
-      $("#categoriesTable tbody").empty();
-      $("#productsTable tbody").empty();
+      // Load select options first
+      loadSelectOptions();
 
-      // Populate categories
-      formData.categories.forEach((category) => {
-        const template = $("#categoriesTable tbody tr.category-row:first").clone(true);
-        template.find(".category-select").val(category.category_id);
-        template.find(".category-percentage").val(category.percentage);
-        template.find(".category-quantity").val(category.quantity);
-        template.find(".category-total").val(category.total);
-        $("#categoriesTable tbody").append(template);
-      });
+      // Use a timeout to ensure options are loaded before setting values
+      setTimeout(() => {
+        // Clear existing rows
+        $("#categoriesTable tbody").empty();
+        $("#productsTable tbody").empty();
 
-      // Populate products
-      formData.products.forEach((product) => {
-        const template = $("#productsTable tbody tr.product-row:first").clone(true);
-        template.find(".recipe-select").val(product.recipe_id);
-        template.find(".product-percentage").val(product.percentage);
-        template.find(".product-quantity").val(product.quantity);
-        template.find(".product-total").val(product.total);
-        $("#productsTable tbody").append(template);
-      });
+        // Populate categories
+        formData.categories.forEach((category) => {
+          const template = $("#categoriesTable tbody tr.category-row:first").clone(true);
+          template.find(".category-select").val(category.category_id);
+          template.find(".category-percentage").val(category.percentage);
+          template.find(".category-quantity").val(category.quantity);
+          template.find(".category-total").val(category.total);
+          $("#categoriesTable tbody").append(template);
+        });
 
-      // Add an empty row for new entries
-      $("#addCategory").click();
-      $("#addProduct").click();
+        // Populate products
+        formData.products.forEach((product) => {
+          const template = $("#productsTable tbody tr.product-row:first").clone(true);
+          template.find(".recipe-select").val(product.recipe_id);
+          template.find(".product-percentage").val(product.percentage);
+          template.find(".product-quantity").val(product.quantity);
+          template.find(".product-total").val(product.total);
+          $("#productsTable tbody").append(template);
+        });
 
-      updateRowNumbers();
-      updateTotals();
-      showToast("Data loaded successfully!", "success");
+        // Add an empty row for new entries
+        $("#addCategory").click();
+        $("#addProduct").click();
+
+        updateRowNumbers();
+        updateTotals();
+        showToast("Data loaded successfully!", "success");
+      }, 500); // Adjust the timeout as needed
     } else {
       showToast("No saved data found", "warning");
     }
