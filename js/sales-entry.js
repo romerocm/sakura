@@ -150,7 +150,18 @@ $(document).ready(function () {
     $("#average_order").val(averageOrder.toFixed(2));
   }
 
-  // Event Handlers
+  // Event Handlers for day navigation
+  $("#prevDay").on("click", function () {
+    const currentDate = new Date($("#sale_date").val());
+    currentDate.setDate(currentDate.getDate() - 1);
+    $("#sale_date").val(currentDate.toISOString().split("T")[0]);
+  });
+
+  $("#nextDay").on("click", function () {
+    const currentDate = new Date($("#sale_date").val());
+    currentDate.setDate(currentDate.getDate() + 1);
+    $("#sale_date").val(currentDate.toISOString().split("T")[0]);
+  });
   $("#addCategory").on("click", function () {
     const template = $("#categoriesTable tbody tr.category-row:first").clone(
       true
