@@ -224,9 +224,9 @@ $(document).ready(function () {
       $("#customer_count").val(formData.customer_count);
       $("#orders_count").val(formData.orders_count);
 
-      // Clear existing rows
-      $("#categoriesTable tbody").empty();
-      $("#productsTable tbody").empty();
+      // Clear existing rows except the first one to keep the template
+      $("#categoriesTable tbody").find("tr:gt(0)").remove();
+      $("#productsTable tbody").find("tr:gt(0)").remove();
 
       // Populate categories
       formData.categories.forEach((category) => {
