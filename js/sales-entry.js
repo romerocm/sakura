@@ -2,7 +2,8 @@
 $(document).ready(function () {
   // Initialize form
   function initializeForm() {
-    $("#sale_date").val(new Date().toISOString().split("T")[0]);
+    const lastSaleDate = localStorage.getItem("lastSaleDate");
+    $("#sale_date").val(lastSaleDate || new Date().toISOString().split("T")[0]);
     loadSelectOptions();
     updateRowNumbers();
     updateTotals();
@@ -326,6 +327,7 @@ $(document).ready(function () {
         if (response.success) {
           showToast("Daily sales summary saved successfully!", "success");
           $("#dailySalesForm")[0].reset();
+          localStorage.setItem("lastSaleDate", formData.sale_date);
           initializeForm();
         } else {
           showToast(response.message || "Error saving sales summary", "danger");
